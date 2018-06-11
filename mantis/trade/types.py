@@ -13,3 +13,20 @@ class ServiceType(object):
     StrategyRunner      = ValueEntry('strategy_runner',u'策略容器')
     StrategyLauncher    = ValueEntry('strategy_launcher',u'策略加载器')
     FrontLauncher       = ValueEntry('front_launcher',u'前端服务加载器,负责交易/行情适配器的加载')
+
+
+class TimeDuration(object):
+    SECOND     = 1
+    MINUTE     = SECOND*60
+    HOUR       = MINUTE*60
+    MINUTE_1   = MINUTE
+    MINUTE_5   = MINUTE*5
+    MINUTE_10  = MINUTE*10
+    MINUTE_15  = MINUTE*15
+    MINUTE_30  = MINUTE*30
+    HOUR_1     = HOUR
+    HOUR_5     = HOUR*5
+    DAY        = HOUR*24
+
+
+

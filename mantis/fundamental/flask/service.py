@@ -23,10 +23,10 @@ from threading import Thread
 
 import platform
 
-if platform.system() == 'Windows':
-    from wsgiref.simple_server import make_server
-else:
-    from gevent import pywsgi
+# if platform.system() == 'Windows':
+#     from wsgiref.simple_server import make_server
+# else:
+#     from gevent import pywsgi
 
 from flask import Flask,request,g
 from flask import Flask,Blueprint
@@ -303,13 +303,20 @@ class FlaskService( ServiceBase):
         host = http.get('host', '127.0.0.1')
         port = http.get('port', 5000)
         app = self.app
-
-
-        if platform.system() == 'Windows':
-            self.server = make_server(host, port, app)
-        else:
+        from mantis.fundamental.application.use_gevent import USE_GEVENT
+        if USE_GEVENT:
+            from gevent import pywsgi
             self.server = pywsgi.WSGIServer((host, port), app)
             self.server.start()
+        else:
+            from wsgiref.simple_server import make_server
+            self.server = make_server(host, port, app)
+
+        # if platform.system() == 'Windows':
+        #     self.server = make_server(host, port, app)
+        # else:
+        #     self.server = pywsgi.WSGIServer((host, port), app)
+        #     self.server.start()
 
         self.logger.info('Service: %s started, Listen on %s:%s ...' % (self.name, host, port))
 

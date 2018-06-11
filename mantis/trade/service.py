@@ -218,7 +218,7 @@ class TradeService(ServiceBase):
         注册服务运行状态
         :return:
         """
-        print 'times:',task.times,'user:',task.user
+        # print 'times:',task.times,'user:',task.user
         dict_=  {
             ServiceCommonProperty.LiveTime.v: time.time(),
         }

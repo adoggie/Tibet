@@ -1,8 +1,14 @@
 # encoding: UTF-8
 
 # 系统模块
-# from queue import Queue, Empty
-from gevent.queue import Queue
+from mantis.fundamental.application.use_gevent import USE_GEVENT
+
+if USE_GEVENT:
+    from gevent.queue import Queue
+else:
+    from queue import Queue, Empty
+#
+
 from threading import Thread
 from time import sleep
 from collections import defaultdict
@@ -244,7 +250,7 @@ class EventEngine(object):
             event = Event(type_=EVENT_TIMER)
         
             # 向队列中存入计时器事件
-            self.put(event)
+            # self.put(event)
             # todo. comments above line(scott)
             # 等待
             sleep(self.__timerSleep)

@@ -1,16 +1,23 @@
 # coding:utf-8
 
-from gevent.queue import Queue
+from mantis.fundamental.application.use_gevent import USE_GEVENT
+if USE_GEVENT:
+    from gevent.queue import Queue
+else:
+    from queue import Queue
+
+import json
 from threading import Thread
 from datetime import datetime, time
+from collections import OrderedDict
 
 from vnpy.event import EventEngine
-from vnpy.trader.vtEvent import EVENT_LOG, EVENT_ERROR,EVENT_TICK
+from vnpy.trader.vtEvent import EVENT_LOG, EVENT_ERROR,EVENT_TICK,EVENT_CONTRACT
 from vnpy.trader.vtEngine import MainEngine, LogEngine
 from vnpy.trader.gateway import ctpGateway
 from vnpy.trader.vtObject import VtSubscribeReq, VtLogData, VtBarData, VtTickData
 from mantis.fundamental.application.app import instance
-
+from mantis.fundamental.utils.useful import hash_object
 from mantis.trade.service import TradeService,TradeFrontServiceTraits,ServiceType,ServiceCommonProperty
 
 class MarketService(TradeService,TradeFrontServiceTraits):
@@ -25,6 +32,9 @@ class MarketService(TradeService,TradeFrontServiceTraits):
         self.mainEngine = None
         self.logger = instance.getLogger()
         self.symbols = {} # 已经订阅的合约
+        self.contracts = OrderedDict()
+        self.ticks_counter = 0
+        self.ticks_samples = []
 
     def init(self, cfgs,**kwargs):
         self.service_id = cfgs.get('id')
@@ -71,25 +81,27 @@ class MarketService(TradeService,TradeFrontServiceTraits):
         self.ee = EventEngine()
         le.info(u'事件引擎创建成功')
 
-        self.mainEngine = MainEngine( self.ee,self) # 忽略掉 默认的 DataEngine
+        self.mainEngine = MainEngine( self.ee) # 忽略掉 默认的 DataEngine
         self.mainEngine.addGateway(ctpGateway)
         le.info(u'主引擎创建成功')
 
-        self.registerEvent()
+
 
         le.info(u'注册日志事件监听')
 
-
+        self.registerEvent()
         # cfgs = self.cfgs.get('gateway',{}) # 本地加载
         cfgs = self.convertToVnpyGatewayConfig()
         self.mainEngine.connect( self.gateway,cfgs)
 
         le.info(u'连接CTP接口')
 
-    def processLogEvent(self,event):
-        pass
 
-    def processErrorEvent(event):
+
+    def processLogEvent(self,event):
+        print event
+
+    def processErrorEvent(self,event):
         """
         处理错误事件
         错误信息在每次登陆后，会将当日所有已产生的均推送一遍，所以不适合写入日志
@@ -123,7 +135,7 @@ class MarketService(TradeService,TradeFrontServiceTraits):
                del  self.symbols[s]
 
     def getSymbols(self):
-        return list(self.symbols.keys())
+        return list(self.contracts.keys())
 
 
     def procecssTickEvent(self, event):
@@ -132,7 +144,8 @@ class MarketService(TradeService,TradeFrontServiceTraits):
 
         # 生成datetime对象
         if not tick.datetime:
-            tick.datetime = datetime.strptime(' '.join([tick.date, tick.time]), '%Y%m%d %H:%M:%S.%f')
+            # tick.datetime = datetime.strptime(' '.join([tick.date, tick.time]), '%Y%m%d %H:%M:%S.%f')
+            tick.service = self.getServiceType() +'.'+self.getServiceId()
         self.queue.put(tick)
 
 
@@ -141,16 +154,41 @@ class MarketService(TradeService,TradeFrontServiceTraits):
         self.ee.register(EVENT_TICK, self.procecssTickEvent)
         self.ee.register(EVENT_LOG, self.processLogEvent)
         self.ee.register(EVENT_ERROR, self.processErrorEvent)
+        self.ee.register(EVENT_CONTRACT, self.processContractEvent)
+
+    def subscribeAllContracts(self):
+        for symbol in self.contracts.keys():
+            req = VtSubscribeReq()
+            req.symbol = symbol
+            self.mainEngine.subscribe(req, self.gateway)  # CTP
+
+    def processContractEvent(self, event):
+        """处理合约事件
+           连接交易系统之后,会通过此接口接收到CTP所有当前合约
+        """
+        contract = event.dict_['data']
+        self.contracts[ contract.vtSymbol] = contract
+        if contract.last:
+            # start contract subscribe
+            self.subscribeAllContracts()
+
 
     def threadDataFanout(self):
         """运行插入线程"""
         while self.active:
             try:
-                print 'current tick queue size:', self.queue.qsize()
+                # print 'current tick queue size:', self.queue.qsize()
                 # dbName, collectionName, d = self.queue.get(block=True, timeout=1)
                 tick  = self.queue.get(block=True, timeout=1)
                 symbol = tick.vtSymbol
-                self.dataFanout('switch0',tick.__dict__,symbol = symbol)
+                hashobj =  hash_object(tick)
+                jsondata = json.dumps(hashobj)
+                self.dataFanout('switch0',jsondata,symbol = symbol)
+                self.ticks_counter += 1
+                if len(self.ticks_samples) > 5:
+                    del self.ticks_samples[0]
+                self.ticks_samples.append(hashobj)
 
             except Exception as e:
-                self.logger.error( str(e) )
+                # self.logger.error( str(e) )
+                pass

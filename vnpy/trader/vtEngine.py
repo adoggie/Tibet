@@ -19,7 +19,7 @@ from vnpy.trader.vtGateway import *
 from vnpy.trader.language import text
 from vnpy.trader.vtFunction import getTempPath
 
-from vnpy.zebra.trade import app
+# from vnpy.zebra.trade import app
 
 ########################################################################
 class MainEngine(object):
@@ -37,8 +37,8 @@ class MainEngine(object):
         
         # 创建数据引擎
         self.dataEngine = dataEngine
-        if not self.dataEngine:
-            self.dataEngine = DataEngine(self.eventEngine)
+        # if not self.dataEngine:
+        #     self.dataEngine = DataEngine(self.eventEngine)
 
         # MongoDB数据库相关
         self.dbClient = None    # MongoDB客户端对象

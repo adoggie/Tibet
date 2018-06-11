@@ -7,6 +7,8 @@ revision:
     1. create 2017/4/8
 """
 
+import time
+import traceback
 from threading import Thread,Condition,Lock
 import redis as Redis
 from mantis.fundamental.utils.importutils import import_function
@@ -32,6 +34,7 @@ class MessageChannel(object):
         self.isclosed = True
         self.pubsub = None
         self.sub_handlers ={}
+        self.props ={}
 
 
     @property
@@ -43,7 +46,7 @@ class MessageChannel(object):
             if self.cfgs.get('type') == 'pubsub':
                 self.pubsub = self.conn.pubsub()
                 self.pubsub.subscribe(self.name)
-            self.thread = Thread(target=self.message_recieving())
+            self.thread = Thread(target=self.message_recieving)
             self.thread.start()
 
     def close(self):
@@ -90,15 +93,25 @@ class MessageChannel(object):
         self.isclosed = False
 
         while not self.isclosed:
-            if self.cfgs.get('type') == 'pubsub':
-                message = self.pubsub.get_message()
-            else:
-                message = self.conn.blpop(self.name,0.1)
-            if message is not None:
-                ctx ={
-                    "channel":self,
-                }
-                self.message_handler(message, ctx)
+            try:
+                if self.cfgs.get('type') == 'pubsub':
+                    message = self.pubsub.get_message()
+                else:
+                    message = self.conn.blpop(self.name,1)
+                if message is not None:
+                    ctx ={
+                        "channel":self,
+                    }
+                    try:
+                        self.message_handler(message[1], ctx)  # message[0] is list's name in redis
+                    except:
+                        print message
+                        traceback.print_exc()
+            except:
+                traceback.print_exc()
+                time.sleep(1)
+
+
 
 
 

@@ -99,8 +99,8 @@ message_brokers:
     db: 0
     enable: true
     channels:
-      - name: 'ctp_contract_tick_queue'
-#        handler: 'get_message'
+      - name: 'ctp_ticks'
+        handler: 'handler.get_message_on_ctp_ticks'
         enable: true
         type: 'queue' # or queue
 
@@ -146,22 +146,12 @@ services:
     id:     'data-res-server'
     enable:     true
     class:      'main.DataResourceService'
-    gateway:
-      name: 'CTP'
-      brokerID:   "9999"
-      mdAddress:  "tcp://180.168.146.187:10011"
-      tdAddress:  "tcp://180.168.146.187:10001"
-      userID:     "113967"
-      password:  "loginmm6688"
-      comments:  "交易服务器地址可以不设置,仅仅使用行情接收功能"
-      authCode:   ''
-      userProductInfo: ''
 
     fanout:
-      - name: 'switch0'
-        channels:
-          - 'redis/ctp_ticks/queue'
-          - 'redis/ctp_tick_{symbol}/pubsub'
+#      - name: 'switch0'
+#        channels:
+#          - 'redis/ctp_ticks/queue'
+#          - 'redis/ctp_tick_{symbol}/pubsub'
       - name: 'logging'
         channels:
           - 'redis/trade.log.{service_type}/queue'

@@ -29,7 +29,10 @@ def subscribe():
 def unsubscribe():
     pass
 
-
+def ticks():
+    service = instance.serviceManager.get('main')
+    result= dict(count=service.ticks_counter,ticks=service.ticks_samples)
+    return CR().assign(result).response
 """
 curl -l -H "Content-type: application/json" -X POST -d '["a","b","c"]' http://172.16.109.237:18901
 """
