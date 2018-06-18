@@ -103,6 +103,15 @@ message_brokers:
         handler: 'handler.get_message_on_ctp_ticks'
         enable: true
         type: 'queue' # or queue
+        extra:
+          db_name: 'Ctp_Tick'
+
+      - name: 'ctp_bars'
+        handler: 'handler.get_message_on_ctp_bars'
+        enable: true
+        type: 'queue' # or queue
+        extra:
+          db_name: 'Ctp_Bar_{scale}'
 
 services:
   - name: 'http-subscribe'
@@ -128,18 +137,18 @@ services:
         name: 'v1'
         register: true
         modules:
-          - name: 'contract'
-            url: '/contract'
+          - name: 'tick'
+            url: '/ticks'
             routes:
-              - url: '/list'                    # url name
-                name: 'list_contracts'   # function name
+              - url: '/'                    # url name
+                name: 'query_ticks'   # 查询行情tick
                 methods: 'GET'
-              - url: '/subscribe'
-                name: 'subscribe'
-                methods: 'POST'
-              - url: '/unsubscribe'
-                name: 'unsubscribe'
-                methods: 'POST'
+          - name: 'bar'
+            url: '/bars'
+            routes:
+              - url: '/'                    # url name
+                name: 'query_bars'   # 查询 bar
+                methods: 'GET'
 
 
   - name:       'main'
@@ -159,16 +168,5 @@ services:
 
     ctp_tick_filters:
       - 'filters.CtpTickValidator'
-
-
-
-
-
-
-# qpid-receive -b localhost:5672 -a "mq_test;{create:always,node:{type:queue,durable:true}}"
-
-
-
-
 
 

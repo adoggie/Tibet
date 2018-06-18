@@ -1,6 +1,7 @@
 # encoding: UTF-8
 
 from vnpy.trader.language import constant
+from vnpy.trader.language.chinese.constant import *
 
 # 将常量定义添加到vtConstant.py的局部字典中
 d = locals()

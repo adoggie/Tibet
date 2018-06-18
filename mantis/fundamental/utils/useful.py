@@ -54,14 +54,31 @@ class Instance(object):
         return self.handle
 
 
-def hash_object(obj):
+def hash_object(obj,key_prefix='',excludes=()):
     attrs = [s for  s in dir(obj) if not s.startswith('__')  ]
     kvs={}
     for k in attrs:
         attr = getattr(obj, k)
         if not callable(attr):
+            if k in excludes:
+                continue
+            if key_prefix:
+                k = key_prefix + k
             kvs[k] = attr
+
+
     return kvs
+
+def object_assign(obj,values,add_new=False):
+    """将values的key对应的value赋给对象obj的属性"""
+    attrs = [s for  s in dir(obj) if not s.startswith('__')  ]
+    kvs={}
+    for k,v in values.items():
+        if not add_new:
+            if k in attrs:
+                setattr(obj,k,v)
+        else:
+            setattr(obj,k,v)
 
 def get_config_item(root,path,default=None):
     """根据配置路径 x.y.z ,获取配置项"""

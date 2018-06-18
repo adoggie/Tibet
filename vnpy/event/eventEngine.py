@@ -6,7 +6,7 @@ from mantis.fundamental.application.use_gevent import USE_GEVENT
 if USE_GEVENT:
     from gevent.queue import Queue
 else:
-    from queue import Queue, Empty
+    from Queue import Queue, Empty
 #
 
 from threading import Thread

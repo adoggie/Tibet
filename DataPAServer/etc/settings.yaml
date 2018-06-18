@@ -92,22 +92,23 @@ message_brokers:
         type: 'queue'
 
   - name: 'redis'
-    class: 'mantis.fundamental.redis.rediscache.MessageBroker'
-    host: '127.0.0.1'
-    port: 5603
-    password: '1111'
+    class: 'mantis.fundamental.redis.broker.MessageBroker'
+    host: '172.16.109.1'
+    port: 6379
+    password: ''
     db: 0
     enable: true
     channels:
-      - name: 'ctp_contract_tick_queue'
-#        handler: 'get_message'
+      - name: 'ctp_ticks_*'
+        handler: 'handler.get_symbol_ticks'
         enable: true
-        type: 'queue' # or queue
+        type: 'pubsub' # or queue
+
 
 services:
   - name: 'http-subscribe'
     class: 'mantis.fundamental.flask.service.FlaskService'
-    enable: true
+    enable: false
     block: false
     cfgs:
       SQLALCHEMY_DATABASE_URI : 'sqlite:////tmp/test.db'
@@ -127,83 +128,24 @@ services:
         name: 'v1'
         register: true
         modules:
-          - name: 'contract'
-            url: '/contract'
-            routes:
-              - url: '/list'                    # url name
-                name: 'list_contracts'   # function name
-                methods: 'GET'
-              - url: '/subscribe'
-                name: 'subscribe'
-                methods: 'POST'
-              - url: '/unsubscribe'
-                name: 'unsubscribe'
-                methods: 'POST'
+
 
 
   - name:       'main'
+    id:         'paserver-0'
     enable:     true
-    class:      'service.ctp_market.MarketService'
-    gateway:
-      name: 'CTP'
-      brokerID:   "9999"
-      mdAddress:  "tcp://180.168.146.187:10011"
-      tdAddress:  "tcp://180.168.146.187:10001"
-      userID:     "113967"
-      password:  "loginmm6688"
-      comments:  "交易服务器地址可以不设置,仅仅使用行情接收功能"
+    class:      'main.PAService'
 
+    generate_bars: '1m,5m,15m,30m,1h'
 
-    ctp_contract_tick_queue: 'ctp_contract_tick_queue'
-    ctp_contract_tick_pubsub_prefix: 'ctp_contract_tick_'
-
-    ctp_tick_filters:
-      - 'filters.CtpTickValidator'
-
-
-
-
-#    message_handlers:
-#      - name: 'market_recieved'
-#        broker: 'redis1/ctp_market'
-#        handler: 'onMarketRecved'
-#        enable: true
-#
-#    dsstream:
-#        drains:
-#          - name: 'redis1'
-#            ds: 'redis1/ctp_market'
-#            handler: 'datahandlers.cpt_market_handler'
-#            enable: true
-#            params:
-#              flexible: true
-#        spouts:
-#          - name: 'redis-market'
-#            ds: 'redis1/ctp_market_all'
-#            enable: true
-#
-#  - name: 'django'
-#    type: 'django'
-#    django_settings: 'project.settings'
-#    http:
-#      host : '127.0.0.1'
-#      port : 5555
-#      threaded: false
-#      debug: true
-#
-#
-#
-#
-#cas_config:
-#  cas_server: 'https://localhost:80'
-#  success_login: '/success_login'
-
-
-
-# qpid-receive -b localhost:5672 -a "mq_test;{create:always,node:{type:queue,durable:true}}"
-
-
-
-
+    fanout:
+      - name: 'switch0'
+        channels:
+          - 'redis/ctp_bars/queue'
+          - 'redis/ctp_bar_{symbol}_{scale}/pubsub'
+      - name: 'logging'
+        channels:
+          - 'redis/trade.log.{service_type}/queue'
+          - 'redis/trade.log.{service_type}.{service_id}/pubsub'
 
 

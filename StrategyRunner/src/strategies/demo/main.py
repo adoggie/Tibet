@@ -1,10 +1,11 @@
 #coding: utf-8
 
 
-ctx = 'context object'
+context = None
 
-def init():
-    pass
+
+def init(ctx):
+    print ctx
 
 def start():
     pass
@@ -21,3 +22,4 @@ def onTrade(data):
 
 def onBar(bar):
     pass
+

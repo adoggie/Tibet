@@ -4,7 +4,7 @@ from mantis.fundamental.application.use_gevent import USE_GEVENT
 if USE_GEVENT:
     from gevent.queue import Queue
 else:
-    from queue import Queue
+    from Queue import Queue
 
 import json
 from threading import Thread

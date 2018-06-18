@@ -143,19 +143,12 @@ services:
 
 
   - name:       'main'
-    id:     'ctp-market-adapter'
+    id:     'strategy-runner'
     enable:     true
     class:      'market.MarketService'
-    gateway:
-      name: 'CTP'
-      brokerID:   "9999"
-      mdAddress:  "tcp://180.168.146.187:10011"
-      tdAddress:  "tcp://180.168.146.187:10001"
-      userID:     "113967"
-      password:  "loginmm6688"
-      comments:  "交易服务器地址可以不设置,仅仅使用行情接收功能"
-      authCode:   ''
-      userProductInfo: ''
+    tick_sub_key: '{gateway}_tick_{symbol}'
+    bar_sub_key: '{gateway}_bar_{symbol}_{scale}'
+
 
     fanout:
       - name: 'switch0'

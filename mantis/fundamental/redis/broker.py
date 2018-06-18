@@ -93,17 +93,25 @@ class MessageChannel(object):
         self.isclosed = False
 
         while not self.isclosed:
+            type_ = self.cfgs.get('type')
             try:
-                if self.cfgs.get('type') == 'pubsub':
+                ctx = {
+                    "channel": self,
+                    "name": self.name
+                }
+                message = None
+                if type_ == 'pubsub':
                     message = self.pubsub.get_message()
+                    if message[0] == 'message':
+                        message = message[2]
+                    else:
+                        message = None # skip 'subscribe' message[0]
                 else:
                     message = self.conn.blpop(self.name,1)
                 if message is not None:
-                    ctx ={
-                        "channel":self,
-                    }
                     try:
-                        self.message_handler(message[1], ctx)  # message[0] is list's name in redis
+                        # self.message_handler(message[1], ctx)  # message[0] is list's name in redis
+                        self.message_handler(message, ctx)  # message[0] is list's name in redis
                     except:
                         print message
                         traceback.print_exc()
@@ -139,8 +147,9 @@ class MessageBroker(object):
             channel.open()
 
     def close(self):
-        for channel in self.channels:
+        for name,channel in self.channels.items():
             channel.close()
+            del self.channels[name]
 
     def join(self):
         pass

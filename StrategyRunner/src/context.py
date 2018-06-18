@@ -1,16 +1,16 @@
 #coding:utf-8
 
+
+from mantis.trade.strategy import StrategyTask
+from mantis.trade.bar import ArrayManager
+
 class Context(object):
     def __init__(self):
         self.controller = None
         self.props ={}
-        self.event = StrategyEvent()
+        self.task = StrategyTask()
+        self.toolset = ToolSet
 
+class ToolSet(object):
+    ArrayManager = ArrayManager
 
-
-class StrategyEvent(object):
-    def __init__(self,tick=None,order=None,trade=None,bar=None):
-        self.onTick = tick
-        self.onOrder = order
-        self.onTrade = trade
-        self.onBar = bar

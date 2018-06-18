@@ -6,7 +6,7 @@ from threading import Thread
 from mantis.fundamental.application.app import instance
 from mantis.fundamental.service import ServiceBase
 from mantis.fundamental.basetype import ValueEntry
-from .types import ServiceType
+from .types import ServiceType,TradeAccountInfo
 from .table import ServiceRuntimeTable
 
 class TimedTask(object):
@@ -58,9 +58,9 @@ class ServicePropertyFrontLauncher(object):
     TradeAdapterIDs     = ValueEntry('trade_adapter_ids',u'资金交易适配程序编号')
     MarketAdapterIDs    = ValueEntry('market_adapter_ids',u'行情适配服务编号')
 
-class ProductClass(object):
-    Future = ValueEntry('future',u'期货')
-    Stock   = ValueEntry('stock',u'股票')
+# class ProductClass(object):
+#     Future = ValueEntry('future',u'期货')
+#     Stock   = ValueEntry('stock',u'股票')
 
 class ServicePropertyFrontService(object):
     """这里指 market , trade 前端接入服务"""
@@ -78,19 +78,10 @@ class ServicePropertyFrontService(object):
 class ServicePropertyMarketAdapter(object):
     SubscribeContracts  = ValueEntry('subscribe_contracts',u'准备订阅的合约编号')
 
-class TradeFrontServiceTraits(object):
+class TradeFrontServiceTraits(TradeAccountInfo):
     def __init__(self):
-        self.product_class = ''
-        self.exchange = ''
-        self.gateway = ''
-        self.broker = ''
-        self.user       = ''
-        self.password   =''
-        self.market_server_addr = ''
-        self.trade_server_addr  =''
+        TradeAccountInfo.__init__(self)
 
-        self.auth_code = ''
-        self.user_product_info =''
 
     def syncDownServiceConfig(self):
         self.product_class  = self.cfgs_remote.get(ServicePropertyFrontService.ProductClass.v)
