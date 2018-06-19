@@ -61,7 +61,7 @@ class FlaskService( ServiceBase):
         self.logger = Logger(__name__)
         self.isclosed = False
         self.thread = None
-
+        self.server = None
 
     def init(self, cfgs, **kwargs):
         #from mantis.fundamental.application.app import instance
@@ -204,6 +204,8 @@ class FlaskService( ServiceBase):
         cfgs = self.getConfig().get('blueprints',[])
         for cfg in cfgs:
             # module = import_module( cfgs.get('module'))
+            if not cfg.get('register',True):
+                continue
             package_name = cfg.get('name','')
             package = cfg.get('package')
             package_url = cfg.get('url')
@@ -324,7 +326,8 @@ class FlaskService( ServiceBase):
 
 
     def stop(self):
-        self.server.close()
+        if self.server:
+            self.server.stop()
 
     def registerBlueprint(self,bp,url):
         self.app.register_blueprint( bp , url_prefix= url )

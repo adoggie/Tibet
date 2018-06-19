@@ -32,7 +32,9 @@ class Application(Singleton,object):
         self.pluginsIndexed =[]
         self.wait_ev = Event()
         self.props ={}
-
+        self.actived = False
+        self.inited = False
+        self.aborted = False
 
         global instance
         instance.set(self)
@@ -204,6 +206,7 @@ class Application(Singleton,object):
         self.messageBrokerManager.init(self.getConfig().get('message_brokers'))
 
     def init(self):
+
         self.initOptions()
         self.initDirectories()
         self.initConfig()
@@ -214,6 +217,8 @@ class Application(Singleton,object):
         self.initServices()
         self.initMessageBrokers()
         self.initEnd()
+        self.inited = True
+
         return self
 
     def initPlugins(self):
@@ -312,7 +317,9 @@ class Application(Singleton,object):
         return handler
 
     def run(self):
-
+        if self.aborted:
+            return
+        self.actived = True
         self.datasourceManager.open()
         self.serviceManager.start()
         self.messageBrokerManager.start()
@@ -335,14 +342,21 @@ class Application(Singleton,object):
         print 'Service [%s] Stopped..' % self.name
 
     def serve_forever(self):
-        while not self.wait_ev.is_set():
+        while not self.wait_ev.is_set() and self.actived:
+            # print 'main thread wait for shutdown..'
             self.wait_ev.wait(1)
+        print 'serve_forever run end..'
+
+    def abort(self):
+        self.aborted = True
 
     def stop(self):
+        # self.inited = False
+        self.actived = False
         # print 'To Stop Server..'
         self.messageBrokerManager.stop()
         self.serviceManager.stop()
-        self.datasourceManager.stop()
+        self.datasourceManager.close()
         self.wait_ev.set()
 
     def initSignal(self):

@@ -10,11 +10,7 @@ else:
 
 from threading import Thread
 from datetime import datetime, time
-
-from vnpy.event import EventEngine
 from vnpy.trader.vtEvent import EVENT_LOG, EVENT_ERROR,EVENT_TICK
-from vnpy.trader.vtEngine import MainEngine, LogEngine
-from vnpy.trader.gateway import ctpGateway
 from vnpy.trader.vtObject import VtSubscribeReq, VtLogData, VtBarData, VtTickData
 from mantis.fundamental.application.app import instance
 from mantis.trade.strategy import StrategyRunMode,TradeUserStrategyKeyPrefix,DevelopUserStrategyKeyPrefix
@@ -46,13 +42,19 @@ class StrategyRunner(TradeService):
         :param kwargs:
         :return:
         """
-        # if self.runmode == StrategyRunMode.Development:
-            # self.service_id = cfgs.get('id')
-            # self.service_type = ServiceType.StrategyRunner
+
         self.parseOptions()
+
+        if self.runmode == StrategyRunMode.Null:
+            instance.abort()
+            return
         super(StrategyRunner,self).init(cfgs)
 
     def parseOptions(self):
+        command = ''
+        if len(sys.argv) < 2:
+            print 'Error: Command Must Be (CREATE,LIST,PULL,UPLOAD,REMOVE AND RUN ).'
+            raise RuntimeError()
         command = sys.argv[1].lower()
         if command not in ('create','list','pull','upload','remove','run'):
             return False
@@ -70,10 +72,16 @@ class StrategyRunner(TradeService):
         if len(args)==0:
             print 'Error: strategy name missed.'
             return False
-        strategy_name = options.name
+
+        strategy_name = ''
+        if args:
+            strategy_name = args[0]
+
         # strategy_id = options.sid
+
         self.runmode = StrategyRunMode.Null
-        if command == 'create':
+
+        if command == 'create': # create s1
             create(strategy_name,DevelopUserStrategyKeyPrefix)
         if command == 'list':
             list(strategy_name,DevelopUserStrategyKeyPrefix)
@@ -109,9 +117,6 @@ class StrategyRunner(TradeService):
             run_server_strategy_id(self.service_id)
         if self.runmode == StrategyRunMode.Development:
             run_local_name(self.service_id,DevelopUserStrategyKeyPrefix)
-        if self.runmode == StrategyRunMode.Null:
-            instance.stop()
-            return
 
         # 创建日志引擎
         super(StrategyRunner,self).start()

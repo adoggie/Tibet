@@ -43,7 +43,8 @@ class ServiceManager(object):
             name = cfg.get('name')
             cls = import_class(cfg.get('class'))
             service = cls(name)
-            service.init(cfg,logger= instance.getLogger())
+            # service.init(cfg,logger= instance.getLogger())
+            service.init(cfg)
             self.services[name] = service
 
 

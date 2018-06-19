@@ -22,7 +22,7 @@ class SymbolBarCollection(object):
 
     def onBar(self,bar):
         """由1分钟累积到多分钟Bar"""
-        for bg in self.bglist:
+        for bg in self.bglist.values():
             bg.updateBar(bar)  # 达到 n 分钟将促发 onXminBar
         scale = '1m'
         main = instance.serviceManager.get('main')
@@ -76,5 +76,7 @@ class SymbolBarManager(object):
         if not bc:
             bc = SymbolBarCollection(symbol)
             bc.init(self.bars)
+            self.symbol_bars[symbol] = bc
+
         bc.onTick(tick)
 

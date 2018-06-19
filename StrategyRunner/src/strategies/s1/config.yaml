@@ -1,0 +1,31 @@
+
+# config.yaml
+# 策略的运行配置参数
+
+name: 'demo'
+
+trade_account:
+  product_class: 'FUTURE'
+  gateway:  'CTP'
+  broker: ''
+  user: ''
+  password: ''
+  market_server_addr: ''
+  trade_server_addr: ''
+  auth_code: ''
+  user_product_info: ''
+
+trade_sub_account:
+  account: ''
+  fund_limit: 0
+
+trade_user:
+  user: ''
+  password: ''
+
+strategy:
+  strategy_id: ''
+  params:
+  configs:
+  extras:
+  

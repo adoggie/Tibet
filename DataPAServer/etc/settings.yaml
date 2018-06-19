@@ -71,10 +71,10 @@ datasources:
     root: '/camel'
 
   - name: 'redis'
-    class: 'mantis.fundamental.redis.rediscache.Datasource'
-    host: '127.0.0.1'
-    port: 5603
-    password: '1111'
+    class: 'mantis.fundamental.redis.datasource.Datasource'
+    host: '172.16.109.1'
+    port: 6379
+    password: ''
     db: 0
     enable: true
 
@@ -99,7 +99,7 @@ message_brokers:
     db: 0
     enable: true
     channels:
-      - name: 'ctp_ticks_*'
+      - name: 'ctp_tick_*'
         handler: 'handler.get_symbol_ticks'
         enable: true
         type: 'pubsub' # or queue

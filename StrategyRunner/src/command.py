@@ -9,6 +9,35 @@ from mantis.trade.strategy import DevelopUserStrategyKeyPrefix,TradeUserStrategy
 from mantis.trade.strategy import StrategyTask,StrategyInfo
 from mantis.trade.types import TradeUserInfo,TradeSubAccountInfo,TradeAccountInfo
 
+MAIN_FILE_CONTENT="""
+#coding: utf-8
+
+context = None  #
+
+def init(ctx):
+    pass
+
+def start(ctx):
+    pass
+
+def stop(ctx):
+    pass
+
+
+def onTick(tick,ctx):
+    pass
+
+def onTrade(trade,ctx):
+    pass
+
+def onBar(bar,ctx):
+    pass
+
+def onTimer(timer,ctx):
+    pass 
+
+"""
+
 STRATEGY_CONFIG_FILE="""
 # config.yaml
 # 策略的运行配置参数
@@ -53,17 +82,23 @@ def create(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     在strateies目录下创建name的包,创建main.py,config.yaml文件
     :param name
     :param UserStrategyKeyPrefix
+
+    > create strategy_name
     """
-    redis = instance.datasourceManager.get('redis')
+    redis = instance.datasourceManager.get('redis').conn
     key = UserStrategyKeyPrefix.format(user=get_username(),
                                               strategy_name=name)
     items = redis.keys(key)
     if items:
-        print u'Error: strategy:{} is existed!'.format(name)
+        print 'Error: Strategy: ( {} ) Exists In Redis.'.format(name)
         return False
 
     # 依次创建策略包和相关文件
     path = os.path.join(instance.getHomePath(),'src/strategies',name)
+    if os.path.exists(path):
+        print 'Error: Strategy ( {} ) Exists In Local Directory.'.format(name)
+        return
+
     os.mkdir(path)
 
     filename = os.path.join(path,'__init__.py')
@@ -71,13 +106,14 @@ def create(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     fp.close()
     filename = os.path.join(path, 'main.py')
     fp = open(filename, 'w')
+    fp.write(MAIN_FILE_CONTENT)
     fp.close()
     filename = os.path.join(path,'config.yaml')
     fp = open(filename,'w')
     fp.write(STRATEGY_CONFIG_FILE)
     fp.close()
 
-    print 'Stragegy:{} has been created successful. Path:{}'.format(name,path)
+    print 'Stragegy: {} Created Successful. \nPath:{}'.format(name,path)
     return True
 
 
@@ -88,13 +124,12 @@ def list(name='',UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     :param UserStrategyKeyPrefix
     :return:
     """
-    redis = instance.datasourceManager.get('redis')
-    key = UserStrategyKeyPrefix.format(user=get_username(),
-                                              strategy_name='')
+    redis = instance.datasourceManager.get('redis').conn
+    key = UserStrategyKeyPrefix.format(user=get_username(),strategy_name='*')
     items = redis.keys(key)
     for item in items:
         name = item.split('.')[-1]
-        print 'Strategy:{} '.format(name)
+        print 'Strategy: {} '.format(name)
 
 
 def remove(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
@@ -104,9 +139,8 @@ def remove(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     :param UserStrategyKeyPrefix
     :return:
     """
-    redis = instance.datasourceManager.get('redis')
-    key = UserStrategyKeyPrefix.format(user=get_username(),
-                                              strategy_name=name)
+    redis = instance.datasourceManager.get('redis').conn
+    key = UserStrategyKeyPrefix.format(user=get_username(),strategy_name=name)
     cfgs = redis.hgetall(key)
     if not cfgs:
         print 'Error: Strategy:{} not be found.'.format(name)
@@ -122,7 +156,7 @@ def pull(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     :param UserStrategyKeyPrefix
     :return:
     """
-    redis = instance.datasourceManager.get('redis')
+    redis = instance.datasourceManager.get('redis').conn
     key = UserStrategyKeyPrefix.format(user=get_username(),
                                               strategy_name=name)
     cfgs = redis.hgetall(key)
@@ -155,7 +189,7 @@ def pull(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     fp.close()
 
     path = os.path.join(instance.getHomePath(), 'src/strategies', name)
-    print 'Strategy:{} has been updated. {}'.format(name,path)
+    print 'Strategy: {} Pull Successful. \n{}'.format(name,path)
 
 def upload(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     """
@@ -165,9 +199,8 @@ def upload(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     :param UserStrategyKeyPrefix
     :return:
     """
-    redis = instance.datasourceManager.get('redis')
-    key = UserStrategyKeyPrefix.format(user=get_username(),
-                                              strategy_name=name)
+    redis = instance.datasourceManager.get('redis').conn
+    key = UserStrategyKeyPrefix.format(user=get_username(),strategy_name=name)
 
     path = os.path.join(instance.getHomePath(), 'src/strategies', name)
     filename = os.path.join(path,'config.yaml')
@@ -195,17 +228,29 @@ def upload(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     # 推送到redis 策略仓库
     redis.hmset(key,cfgs)
 
-    print 'Strategy :{}  UpLoad Successful.'.format(name)
+    print 'Strategy: {}  UpLoad Successful.'.format(name)
 
 def run_local_name(name,KeyPrefix):
+    """
+    > run --name=s1
+    :param name:
+    :param KeyPrefix:
+    :return:
+    """
     # run local strategy
     # 本地开发运行策略
     main = instance.serviceManager.get('main')
     main.controller.loadStrategy(name) # 加载策略目录下的指定策略名称的启动模块
     main.controller.open() # 开始
+    print 'Strategy: {}  Begin To Run..'.format(name)
 
 
 def run_server_strategy_id(sid):
+    """
+    > run --sid=s1
+    :param sid:
+    :return:
+    """
     # 运行线上的策略 ,  策略存储在交易用户的策略仓库中
     # 拉取线上(redis)中的策略信息到本地策略目录,并运行
     KeyPrefix = TradeUserStrategyKeyPrefix

@@ -168,7 +168,7 @@ services:
     fanout:
       - name: 'switch0'
         channels:
-          - 'redis/ctp_ticks/queue'
+#          - 'redis/ctp_ticks/queue'
           - 'redis/ctp_tick_{symbol}/pubsub'
       - name: 'logging'
         channels:

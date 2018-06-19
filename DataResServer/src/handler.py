@@ -20,7 +20,7 @@ def get_message_on_ctp_ticks(message,ctx):
         tablename = tick.get('vtSymbol')
     conn = instance.datasourceManager.get('mongodb').conn
     # 数据库名称可以配置在 settings.yaml 的 messagebroker 栏目 的channel.extra属性中
-    dbname = ctx.get('channel').cfgs.get('extras',{}).get('db_name',CTP_TICK_DB_NAME)
+    dbname = ctx.get('channel').cfgs.get('extra',{}).get('db_name',CTP_TICK_DB_NAME)
     db = conn[dbname]
     table = db[tablename]
     table.insert_one(tick)
@@ -28,12 +28,15 @@ def get_message_on_ctp_ticks(message,ctx):
 
 def get_message_on_ctp_bars(message,ctx):
     # chan.props.get('bar')
+
     bar = json.loads(message)
     bar['datetime'] = datetime.datetime.strptime(' '.join([bar.get('date'), bar.get('time')]), '%Y%m%d %H:%M:%S.%f')
     tablename = bar.get('_table_')
-    conn = instance.datasourceManager.get('mongodb')
+    if not tablename:
+        tablename = bar.get('vtSymbol')
+    conn = instance.datasourceManager.get('mongodb').conn
     scale = bar.get('scale','')
-    dbname = ctx.get('channel').cfgs.get('extras', {}).get('db_name', CTP_BAR_DB_NAME)
+    dbname = ctx.get('channel').cfgs.get('extra', {}).get('db_name', CTP_BAR_DB_NAME)
     dbname = dbname.format(scale=scale)
     db = conn[dbname]
     table = db[tablename]

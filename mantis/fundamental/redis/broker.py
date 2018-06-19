@@ -45,7 +45,7 @@ class MessageChannel(object):
         if self.message_handler:
             if self.cfgs.get('type') == 'pubsub':
                 self.pubsub = self.conn.pubsub()
-                self.pubsub.subscribe(self.name)
+                self.pubsub.psubscribe(self.name)
             self.thread = Thread(target=self.message_recieving)
             self.thread.start()
 
@@ -102,12 +102,19 @@ class MessageChannel(object):
                 message = None
                 if type_ == 'pubsub':
                     message = self.pubsub.get_message()
-                    if message[0] == 'message':
-                        message = message[2]
-                    else:
-                        message = None # skip 'subscribe' message[0]
+                    if message:
+                        if  message['type'] == 'pmessage':
+                            ctx['name'] = message['channel']
+                            message = message['data']
+                        else:
+                            message = None
+
                 else:
                     message = self.conn.blpop(self.name,1)
+                    if message:
+                        ctx['name'] = message[0]
+                        message = message[1]
+
                 if message is not None:
                     try:
                         # self.message_handler(message[1], ctx)  # message[0] is list's name in redis
@@ -118,9 +125,6 @@ class MessageChannel(object):
             except:
                 traceback.print_exc()
                 time.sleep(1)
-
-
-
 
 
 class MessageBroker(object):

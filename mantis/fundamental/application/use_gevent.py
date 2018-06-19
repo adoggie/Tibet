@@ -6,7 +6,7 @@ def use_gevent():
     global USE_GEVENT
     if not USE_GEVENT:
         from gevent import monkey
-        monkey.patch_all()
+        monkey.patch_all(Event=True)
         USE_GEVENT = True
 
 

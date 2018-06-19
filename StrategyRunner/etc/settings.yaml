@@ -126,7 +126,7 @@ services:
       - package: 'http'
         url: '/v1'
         name: 'v1'
-        register: true
+        register: false
         modules:
           - name: 'contract'
             url: '/contract'
@@ -145,7 +145,7 @@ services:
   - name:       'main'
     id:     'strategy-runner'
     enable:     true
-    class:      'market.MarketService'
+    class:      'main.StrategyRunner'
     tick_sub_key: '{gateway}_tick_{symbol}'
     bar_sub_key: '{gateway}_bar_{symbol}_{scale}'
 

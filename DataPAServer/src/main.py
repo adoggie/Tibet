@@ -1,5 +1,6 @@
 # coding:utf-8
 
+import copy
 from gevent.queue import Queue
 import json
 from threading import Thread
@@ -15,15 +16,15 @@ from symbolbar import SymbolBarManager
 
 class PAService(TradeService):
     def __init__(self,name):
-        super(TradeService, self).__init__(name)
+        super(PAService, self).__init__(name)
 
         self.active = False  # 工作状态
         self.queue = Queue()  # 队列
-        self.thread = Thread(target=self._run)  # 线程
+        # self.thread = Thread(target=self._run)  # 线程
         self.logger = instance.getLogger()
         self.symbols = set() # 已经订阅的合约
 
-    def init(self, cfgs):
+    def init(self, cfgs,**kwargs):
         self.service_id = cfgs.get('id')
         self.service_type = ServiceType.DataPAServer
         super(PAService,self).init(cfgs)
@@ -43,7 +44,7 @@ class PAService(TradeService):
         # 创建日志引擎
         super(PAService,self).start()
         self.active = True
-        self.thread.start()
+        # self.thread.start()
 
 
     def stop(self):
@@ -53,7 +54,8 @@ class PAService(TradeService):
             # self.thread.join()
 
     def join(self):
-        self.thread.join()
+        # self.thread.join()
+        pass
 
 
     def onXminBar(self,scale,bar):
@@ -63,12 +65,14 @@ class PAService(TradeService):
         :return:
         """
         symbol = bar.vtSymbol
-        hashobj = bar.__dict__
+        hashobj = copy.copy(bar.__dict__)
+
+        ## obj.__dict__ 的使用方法，特别注意： 后续修改 hashobj将改变 bar对象的对应的属性值
+
         hashobj['datetime'] = ''
         hashobj['scale'] = scale
         jsondata = json.dumps(hashobj)
         self.dataFanout('switch0', jsondata, symbol=symbol,scale=scale)
-
 
     def onTick(self,symbol,tick):
         """
@@ -77,4 +81,4 @@ class PAService(TradeService):
         :param tick: (VtTickData)
         :return:
         """
-        SymbolBarManager().ontick(symbol,tick)
+        SymbolBarManager().onTick(symbol,tick)

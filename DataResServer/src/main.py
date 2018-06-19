@@ -48,8 +48,6 @@ class DataResourceService(TradeService):
         # self.thread.start()
 
 
-
-
     def stop(self):
         super(DataResourceService,self).stop()
         if self.active:
