@@ -99,7 +99,7 @@ message_brokers:
     db: 0
     enable: true
     channels:
-      - name: 'ctp_tick_*'
+      - name: 'future_ctp_tick_*'
         handler: 'handler.get_symbol_ticks'
         enable: true
         type: 'pubsub' # or queue
@@ -137,12 +137,13 @@ services:
     class:      'main.PAService'
 
     generate_bars: '1m,5m,15m,30m,1h'
+#    generate_bars: '1m,2m'
 
     fanout:
       - name: 'switch0'
         channels:
-          - 'redis/ctp_bars/queue'
-          - 'redis/ctp_bar_{symbol}_{scale}/pubsub'
+          - 'redis/future_ctp_bars/queue'
+          - 'redis/future_ctp_bar_{symbol}_{scale}/pubsub'
       - name: 'logging'
         channels:
           - 'redis/trade.log.{service_type}/queue'

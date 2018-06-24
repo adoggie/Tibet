@@ -3,6 +3,7 @@
 import json
 import datetime
 from mantis.fundamental.application.app import instance
+from mantis.fundamental.utils.timeutils import datetime_to_timestamp
 
 CTP_TICK_DB_NAME ='Ctp_Tick'
 CTP_BAR_DB_NAME = 'Ctp_Bar'
@@ -15,6 +16,7 @@ def get_message_on_ctp_ticks(message,ctx):
     data = message
     tick = json.loads(data)
     tick['datetime'] = datetime.datetime.strptime(' '.join([tick.get('date'), tick.get('time')]), '%Y%m%d %H:%M:%S.%f')
+    tick['ts'] = datetime_to_timestamp(tick['datetime'])
     tablename = tick.get('_table_')
     if not tablename:
         tablename = tick.get('vtSymbol')
@@ -31,6 +33,7 @@ def get_message_on_ctp_bars(message,ctx):
 
     bar = json.loads(message)
     bar['datetime'] = datetime.datetime.strptime(' '.join([bar.get('date'), bar.get('time')]), '%Y%m%d %H:%M:%S.%f')
+    bar['ts'] = datetime_to_timestamp(bar['datetime'])
     tablename = bar.get('_table_')
     if not tablename:
         tablename = bar.get('vtSymbol')

@@ -35,12 +35,32 @@ class DataResServiceProxy(object):
         pass
 
 
+class TradeAdapterProxy(object):
+    """对应资金账户"""
+    def __init__(self):
+        pass
+
 
 @singleton
 class TradeServiceProxy(object):
     """资金交易管理服务"""
     def __init__(self):
-        pass
+        self.adapters = {} #
+        """
+        product_class:
+          gateway_name:
+            user
+              password
+              mdAddress
+        
+        examples:
+        future.ctp
+            u001:
+        
+        """
+
+    def openAccount(self):
+        """"""
 
 @singleton
 class PAServiceProxy(object):

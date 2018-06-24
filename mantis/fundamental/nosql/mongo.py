@@ -5,6 +5,7 @@ import smtplib,traceback,os,sys,time,os.path,base64
 
 """
 http://api.mongodb.com/python/current/
+https://api.mongodb.com/python/current/api/pymongo/collection.html
 
 """
 

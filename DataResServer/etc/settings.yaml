@@ -99,14 +99,14 @@ message_brokers:
     db: 0
     enable: true
     channels:
-      - name: 'ctp_ticks'
+      - name: 'future_ctp_ticks'
         handler: 'handler.get_message_on_ctp_ticks'
         enable: true
         type: 'queue' # or queue
         extra:
           db_name: 'Ctp_Tick'
 
-      - name: 'ctp_bars'
+      - name: 'future_ctp_bars'
         handler: 'handler.get_message_on_ctp_bars'
         enable: true
         type: 'queue' # or queue

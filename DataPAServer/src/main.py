@@ -1,7 +1,13 @@
 # coding:utf-8
 
 import copy
-from gevent.queue import Queue
+import traceback
+from mantis.fundamental.application.use_gevent import USE_GEVENT
+if USE_GEVENT:
+    from gevent.queue import Queue
+else:
+    from Queue import Queue
+
 import json
 from threading import Thread
 from datetime import datetime, time
@@ -20,7 +26,7 @@ class PAService(TradeService):
 
         self.active = False  # 工作状态
         self.queue = Queue()  # 队列
-        # self.thread = Thread(target=self._run)  # 线程
+        self.thread = Thread(target=self._processData)  # 线程
         self.logger = instance.getLogger()
         self.symbols = set() # 已经订阅的合约
 
@@ -44,17 +50,17 @@ class PAService(TradeService):
         # 创建日志引擎
         super(PAService,self).start()
         self.active = True
-        # self.thread.start()
+        self.thread.start()
 
 
     def stop(self):
         super(PAService,self).stop()
-        if self.active:
-            self.active = False
-            # self.thread.join()
+
+        self.active = False
+
 
     def join(self):
-        # self.thread.join()
+        self.thread.join()
         pass
 
 
@@ -81,4 +87,19 @@ class PAService(TradeService):
         :param tick: (VtTickData)
         :return:
         """
-        SymbolBarManager().onTick(symbol,tick)
+        self.queue.put((symbol,tick))
+
+
+    def _processData(self):
+        self.active = True
+        while self.active:
+            try:
+                data = self.queue.get(block=True, timeout=1)
+                if not data:
+                    continue
+                symbol,tick = data
+                SymbolBarManager().onTick(symbol, tick)
+            except Exception as e:
+                # self.logger.error( str(e) )
+                # traceback.print_exc()
+                pass

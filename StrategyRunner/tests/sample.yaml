@@ -1,0 +1,35 @@
+
+users:
+  - name: 'scott'             # 交易用户名称
+    quotas:                   # 配额设置
+      - account: 'htqh-01'
+        product: 'future'     # 期货、股票
+        limit: 100000
+      - account: 'htqh-02'
+        product: 'future'     # 期货、股票
+        limit: 200000
+
+accounts:                 # 分配的资金账号
+  - name:   'htqh-01'
+    product: 'future'
+    comment: '海通期货'
+    gateway: 'CTP'
+    broker: '9999'
+    user: '113967'
+    password: 'loginmm6688'
+    market_server_addr: 'tcp://180.168.146.187:10011'
+    trade_server_addr: 'tcp://180.168.146.187:10001'
+    auth_code: ''
+    user_product_info: ''
+
+  - name:   'htqh-02'
+    product: 'future'
+    comment: '海通期货'
+    gateway: 'CTP'
+    broker: '9999'
+    user: '1111'
+    password: '11111'
+    market_server_addr: 'tcp://180.168.146.187:10011'
+    trade_server_addr: 'tcp://180.168.146.187:10001'
+    auth_code: ''
+    user_product_info: ''

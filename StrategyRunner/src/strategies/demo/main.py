@@ -1,25 +1,46 @@
 #coding: utf-8
 
 
+# context: Context
 context = None
 
-
 def init(ctx):
-    print ctx
-
-def start():
-    pass
-
-def stop():
-    pass
+    #  See : demo/config.yaml
+    print ctx.configs
 
 
-def onTick(tick):
-    pass
+def start(ctx):
+    print 'strategy: start()..'
+    ctx.controller.setTimer(user='ctp',timeout=2)
+    symbols = ctx.configs.get('sub_ticks','').split(',')
+    ctx.future.subTicks(symbols[0])
+    # ctx.future.subBars(symbols[0],'5m')
 
-def onTrade(data):
-    pass
 
-def onBar(bar):
+def stop(ctx):
+    print 'strategy: stop()..'
+
+
+def onTick(tick,ctx):
+    """
+    tick - mantis.trade.types.TickData
+    """
+    print 'strategy: onTick()..'
+    print 'tick:',tick.symbol
+    print 'tick.data', tick.data
+
+def onTrade(trade,ctx):
+    print 'strategy: onTrade()..'
+
+def onBar(bar,ctx):
+    """
+    bar - mantis.trade.types.BarData()
+    """
+    print 'strategy: onBar()..'
+    print 'bar:',bar.symbol,bar.scale
+    print 'bar.data:',bar.data
+
+def onTimer(timer,ctx):
+    print 'strategy: onTimer()..',timer.timeout,timer.user
     pass
 

@@ -46,5 +46,8 @@ flask-restful
 flask-cors
 gevent-websocket
 ta-lib
+grequests
+pp  # https://www.parallelpython.com/content/view/15/30/#QUICKSMP
+redlock-py
 
 #qpid-python-1.36.0.tar.gz

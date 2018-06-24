@@ -17,7 +17,7 @@ class SymbolBarCollection(object):
     def init(self,barNames):
         for name in barNames:
             if name != '1m':
-                bg = BarGenerator(name,None,xmin=TimeScale.SCALES.get(name),onXminBar=self.onXminBar)
+                bg = BarGenerator(name,None,xmin=TimeScale.SCALES.get(name)/60,onXminBar=self.onXminBar)
                 self.bglist[name] = bg
 
     def onBar(self,bar):

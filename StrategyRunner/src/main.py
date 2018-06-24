@@ -2,24 +2,25 @@
 
 
 import os,sys
-from mantis.fundamental.application.use_gevent import USE_GEVENT
-if USE_GEVENT:
-    from gevent.queue import Queue
-else:
-    from Queue import Queue
 
-from threading import Thread
-from datetime import datetime, time
-from vnpy.trader.vtEvent import EVENT_LOG, EVENT_ERROR,EVENT_TICK
-from vnpy.trader.vtObject import VtSubscribeReq, VtLogData, VtBarData, VtTickData
+# from mantis.fundamental.application.use_gevent import USE_GEVENT
+# if USE_GEVENT:
+#     from gevent.queue import Queue
+# else:
+#     from Queue import Queue
+
+# from threading import Thread
+# from datetime import datetime, time
+# from vnpy.trader.vtEvent import EVENT_LOG, EVENT_ERROR,EVENT_TICK
+# from vnpy.trader.vtObject import VtSubscribeReq, VtLogData, VtBarData, VtTickData
+
 from mantis.fundamental.application.app import instance
-from mantis.trade.strategy import StrategyRunMode,TradeUserStrategyKeyPrefix,DevelopUserStrategyKeyPrefix
+from mantis.trade.strategy import StrategyRunMode
 from mantis.trade.service import TradeService,TradeFrontServiceTraits,ServiceType,ServiceCommonProperty
 from controller import StrategyController
 from optparse import OptionParser
 from command import create,list,upload,pull,remove,run_local_name,run_server_strategy_id
-
-# class Strategy
+from mantis.trade.constants import *
 
 class StrategyRunner(TradeService):
     def __init__(self,name):
@@ -30,8 +31,9 @@ class StrategyRunner(TradeService):
         # self.thread = Thread(target=self.threadDataFanout)  # 线程
         self.logger = instance.getLogger()
         # self.symbols = {} # 已经订阅的合约
-        self.controller = StrategyController(self)
+        self.controller = None
         self.runmode = StrategyRunMode.Null
+
 
     def init(self, cfgs,**kwargs):
         """
@@ -42,7 +44,6 @@ class StrategyRunner(TradeService):
         :param kwargs:
         :return:
         """
-
         self.parseOptions()
 
         if self.runmode == StrategyRunMode.Null:
@@ -62,8 +63,10 @@ class StrategyRunner(TradeService):
         parser = OptionParser()
         parser.add_option("--user",dest='user')
         parser.add_option("--password",dest='password')
-        parser.add_option("--name",dest='name')
-        parser.add_option("--sid",dest='sid')   # 策略编号
+        # parser.add_option("--name",dest='name')
+        # parser.add_option("--sid",dest='sid')   # 策略编号
+        parser.add_option("--remote",action='store_false',dest='isremote')   # 策略编号
+
         parser.add_option("--launcher_id",dest='launcher') # 加载器编号
 
 
@@ -77,30 +80,34 @@ class StrategyRunner(TradeService):
         if args:
             strategy_name = args[0]
 
-        # strategy_id = options.sid
-
         self.runmode = StrategyRunMode.Null
 
         if command == 'create': # create s1
             create(strategy_name,DevelopUserStrategyKeyPrefix)
+
         if command == 'list':
             list(strategy_name,DevelopUserStrategyKeyPrefix)
+
         if command =='pull':
             pull(strategy_name,DevelopUserStrategyKeyPrefix)
+
         if command == 'remove':
             remove(strategy_name,DevelopUserStrategyKeyPrefix)
+
         if command == 'upload':
             upload(strategy_name,DevelopUserStrategyKeyPrefix)
-        if command == 'run_local_name':
-            self.runmode = StrategyRunMode.Development
-            self.service_id = options.name
-            self.service_type = ServiceType.StrategyDevRunner
-            # run_local_name(strategy_name,DevelopUserStrategyKeyPrefix)
-        if command == 'run_server_strategy_id':
-            self.service_id = options.name
-            self.service_type = ServiceType.StrategyRunner
-            self.runmode = StrategyRunMode.Product  #
-            # run_server_strategy_id(strategy_id)
+
+        if command == 'run':
+            if not options.isremote: # run local project
+                self.runmode = StrategyRunMode.Development
+                self.service_id = strategy_name
+                self.service_type = ServiceType.StrategyDevRunner
+                # run_local_name(strategy_name,DevelopUserStrategyKeyPrefix,self)
+            else:
+                self.service_id = strategy_name
+                self.service_type = ServiceType.StrategyRunner
+                self.runmode = StrategyRunMode.Product  #
+                # run_server_strategy_id(strategy_name,self)
 
     def syncDownServiceConfig(self):
         TradeService.syncDownServiceConfig(self)
@@ -112,16 +119,16 @@ class StrategyRunner(TradeService):
         self.logger.addHandler(handler)
 
     def start(self,block=True):
+        self.controller = StrategyController(self)
         self.setupFanoutAndLogHandler()
         if self.runmode == StrategyRunMode.Product:
-            run_server_strategy_id(self.service_id)
+            run_server_strategy_id(self.service_id,self)
         if self.runmode == StrategyRunMode.Development:
-            run_local_name(self.service_id,DevelopUserStrategyKeyPrefix)
+            run_local_name(self.service_id,DevelopUserStrategyKeyPrefix,self)
 
         # 创建日志引擎
-        super(StrategyRunner,self).start()
-        # self.active = True
-        # self.thread.start()
+        TradeService.start(self)
+
 
     def stop(self):
         TradeService.stop(self)

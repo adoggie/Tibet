@@ -24,7 +24,10 @@ class MessageChannel(object):
 
         handler = cfgs.get('handler')
         if handler:
-            self.message_handler = import_function(handler)  # importing functions dynamically
+            if isinstance(handler,str) or isinstance(handler,unicode):
+                self.message_handler = import_function(handler)  # importing functions dynamically
+            else:
+                self.message_handler = handler
 
         self.topic = None
         self.producer = None
@@ -101,7 +104,7 @@ class MessageChannel(object):
                 }
                 message = None
                 if type_ == 'pubsub':
-                    message = self.pubsub.get_message()
+                    message = self.pubsub.get_message(timeout=.5)
                     if message:
                         if  message['type'] == 'pmessage':
                             ctx['name'] = message['channel']
@@ -114,7 +117,7 @@ class MessageChannel(object):
                     if message:
                         ctx['name'] = message[0]
                         message = message[1]
-
+                # print message
                 if message is not None:
                     try:
                         # self.message_handler(message[1], ctx)  # message[0] is list's name in redis

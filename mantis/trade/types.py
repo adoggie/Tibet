@@ -22,6 +22,7 @@ class TimeDuration(object):
     MINUTE     = SECOND * 60
     HOUR       = MINUTE * 60
     MINUTE_1   = MINUTE
+    MINUTE_2   = MINUTE * 2
     MINUTE_5   = MINUTE * 5
     MINUTE_15  = MINUTE * 15
     MINUTE_30  = MINUTE * 30
@@ -29,60 +30,45 @@ class TimeDuration(object):
     DAY        = HOUR * 24
     SCALES ={
         '1m':MINUTE_1,
+        '2m':MINUTE_2,
         '5m':MINUTE_5,
         '15m':MINUTE_15,
         '30m':MINUTE_30,
         '1h':HOUR_1,
         '1d':DAY
     }
-
 TimeScale = TimeDuration
 
 class ProductClass(object):
-    Undefined = ValueEntry('undefined',u'undefined')
-    Future  = ValueEntry('future',u'期货')
-    Stock   = ValueEntry('stock',u'股票')
+    # Undefined = ValueEntry('undefined',u'undefined')
+    # Future  = ValueEntry('future',u'期货')
+    # Stock   = ValueEntry('stock',u'股票')
+    Undefined   = 'undefined'
+    Future      = 'future'
+    Stock       = 'stock'
 
-
-
-class TradeAccountInfo(object):
+class TradeAccount(object):
     """
     交易资金账户信息
     """
     NAME ='trade_account'
     def __init__(self):
-        self.product_class = ''     # 产品类型 :  期货/股票
-        self.exchange = ''
-        self.gateway = ''           # 交易接入系统名称 CTP
-        self.broker = ''            # 经纪公司
-        self.user = ''
-        self.password = ''
-        self.market_server_addr = ''
-        self.trade_server_addr = ''
+        self.name = ''
+        self.product = ''           # future , stock
+        self.comment = ''
+        self.connect = {}       # 连接配置信息，不同接入方式参数不同
 
-        self.auth_code = ''
-        self.user_product_info = ''
-
-    # def update(self,cfgs,prefix=''):
-    #     if prefix :
-    #         prefix+='.'
-    #     prefix+=TradeAccountInfo.NAME+'.'
-    #     self.product_class  = cfgs.get(prefix+'product_class','')
-    #     self.exchange       = cfgs.get(prefix+'exchange','')
-    #     self.gateway        = cfgs.get(prefix+'gateway','')
-    #     self.broker         = cfgs.get(prefix+'broker','')
-    #     self.user           = cfgs.get(prefix+'user','')
-    #     self.password       = cfgs.get(prefix+'password','')
-    #     self.market_server_addr       = cfgs.get(prefix+'market_server_addr','')
-    #     self.trade_server_addr       = cfgs.get(prefix+'trade_server_addr','')
-    #     self.auth_code       = cfgs.get(prefix+'auth_code','')
-    #     self.user_product_info       = cfgs.get(prefix+'user_product_info','')
-    #
-    # def dict(self,prefix=''):
-    #     if prefix:
-    #         prefix+='.'
-    #     prefix+=TradeSubAccountInfo.NAME+'.'
-    #     return hash_object(self,key_prefix=prefix,excludes=['NAME'])
+        # self.product_class = ''     # 产品类型 :  期货/股票
+        # self.exchange = ''
+        # self.gateway = ''           # 交易接入系统名称 CTP
+        # self.broker = ''            # 经纪公司
+        # self.user = ''
+        # self.password = ''
+        # self.market_server_addr = ''
+        # self.trade_server_addr = ''
+        #
+        # self.auth_code = ''
+        # self.user_product_info = ''
 
     def loads(self,cfgs):
         object_assign(self,cfgs)
@@ -90,36 +76,41 @@ class TradeAccountInfo(object):
     def dumps(self):
         return hash_object(self)
 
-USER_NAME_UNDEFINED = ''
-
-class TradeSubAccountInfo(object):
-    """
-    交易开户资金子账户(系统内交易账户）
-    """
-    NAME = 'trade_sub_account'
+class TradeAccountQuota(object):
+    EMPTY_LIST = {}
     def __init__(self):
-        self.account = ''
-        self.fund_limit = 0 # max fund quota for trade user
-
-    # def update(self,cfgs,prefix=''):
-    #     if prefix :
-    #         prefix+='.'
-    #     prefix+=TradeSubAccountInfo.NAME + '.'
-    #     self.account  = cfgs.get(prefix+'account','')
-    #     self.fund_limit  = cfgs.get(prefix+'fund_limit',0)
-    #
-    # def dict(self,prefix=''):
-    #     if prefix:
-    #         prefix+='.'
-    #     prefix+=TradeSubAccountInfo.NAME+'.'
-    #     return hash_object(self,prefix,excludes=['NAME'])
-
-    def loads(self, cfgs):
-        object_assign(self,cfgs)
+        self.name = ''
+        self.account = ''       # 账户名称  TradeAccount.name
+        self.limit = 10000
+        self.product = ProductClass.Undefined
+        self.props = {}
+        self.channels = {}  # 交互通道
 
     def dumps(self):
-        result = hash_object(self)
-        return result
+        result = dict( name = self.name, account = self.account , limit = self.limit)
+
+class TradeUserAccount(object):
+    def __init__(self):
+        self.user = ''
+        self.quotas = TradeAccountQuota.EMPTY_LIST        # TradeAccountQuota
+
+USER_NAME_UNDEFINED = ''
+
+# class TradeSubAccountInfo(object):
+#     """
+#     交易开户资金子账户(系统内交易账户）
+#     """
+#     NAME = 'trade_sub_account'
+#     def __init__(self):
+#         self.account = ''
+#         self.fund_limit = 0 # max fund quota for trade user
+#
+#     def loads(self, cfgs):
+#         object_assign(self,cfgs)
+#
+#     def dumps(self):
+#         result = hash_object(self)
+#         return result
 
 
 class TradeUserInfo(object):
@@ -155,6 +146,8 @@ class TickData(object):
         self.symbol = ''
         self.data = {}
         self.gateway = ''
+        self.handler = None   # ProductHandler
+        self.product = ''
 
 class BarData(object):
     def __init__(self):
@@ -162,5 +155,14 @@ class BarData(object):
         self.symbol = ''
         self.scale = '' # 1m,5m,..,1h,1d...
         self.gateway =''
+        self.handler = None    # ProductHandler
+        self.product = ''
+
+class FutureTradeCommand(object):
+    ORDER_SELL = 'order_sell'
+    ORDER_SHORT = 'order_short'
+    ORDER_COVER = 'order_cover'
+
+
 
 

@@ -1,5 +1,5 @@
 
 
-ctpMarket 
+TradeDispatcher 
 ------
-获取ctp市场行情Tick数据，转发到缓存系统
+交易调度服务器

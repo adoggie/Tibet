@@ -1,8 +1,5 @@
 # coding:utf-8
 
-
-from mantis.fundamental.utils.useful import singleton
-
 from .types import ServiceType
 
 ConfigNames={
@@ -14,19 +11,12 @@ ConfigNames={
     ServiceType.MarketAdapter.v:      'trade.available.market_adapter',
     ServiceType.TradeAdapter.v:       'trade.available.trade_adapter',
     ServiceType.TradeServer.v:        'trade.available.trade_server',
-    ServiceType.StrategyRunner.v:     'trade.available.strategy_runner'
+    ServiceType.StrategyRunner.v:     'trade.available.strategy_runner',
+    ServiceType.StrategyDevRunner.v:  'trade.available.strategy_dev_runner'
 }
 
-
-
-
-
-@singleton
+# @singleton
 class ServiceRuntimeTable(object):
-    # @staticmethod
-    # def instance():
-    #     return ServiceRuntimeTable()
-
     def __init__(self,redis_ = None):
         self.redis = redis_
 
@@ -41,8 +31,7 @@ class ServiceRuntimeTable(object):
     def getServiceIdsByType(self,type_):
         """查询指定服务类型的服务进程编号"""
         key = self.configPrefixByServiceType(type_) + '.*'
-        return  self.reids.keys(key)
-
+        return  self.redis.keys(key)
 
     def getServiceConfigValues(self,service_id,type_):
         key = self.configPrefixByServiceType(type_)+'.'+service_id

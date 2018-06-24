@@ -1,0 +1,18 @@
+cookie: '100'
+name: demo
+quotas:
+- account: htqh-02
+  limit: '200000'
+  product: future
+- account: htqh-01
+  limit: '2000000'
+  name: q001
+  product: future
+strategy:
+  configs:
+    sub_bar_1m: AP810,RM809
+    sub_bar_5m: AP810,RM809
+    sub_ticks: AP810,RM809
+  id: ''
+  sum: null
+user: scott

@@ -343,8 +343,8 @@ class Application(Singleton,object):
 
     def serve_forever(self):
         while not self.wait_ev.is_set() and self.actived:
-            # print 'main thread wait for shutdown..'
             self.wait_ev.wait(1)
+
         print 'serve_forever run end..'
 
     def abort(self):

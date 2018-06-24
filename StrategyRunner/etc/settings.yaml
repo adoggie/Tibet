@@ -107,7 +107,7 @@ message_brokers:
 services:
   - name: 'http-subscribe'
     class: 'mantis.fundamental.flask.service.FlaskService'
-    enable: true
+    enable: false
     block: false
     cfgs:
       SQLALCHEMY_DATABASE_URI : 'sqlite:////tmp/test.db'
@@ -146,8 +146,8 @@ services:
     id:     'strategy-runner'
     enable:     true
     class:      'main.StrategyRunner'
-    tick_sub_key: '{gateway}_tick_{symbol}'
-    bar_sub_key: '{gateway}_bar_{symbol}_{scale}'
+    future_tick_sub_key: 'future_{gateway}_tick_{symbol}'
+    future_bar_sub_key: 'future_{gateway}_bar_{symbol}_{scale}'
 
 
     fanout:

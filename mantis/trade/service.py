@@ -6,7 +6,7 @@ from threading import Thread
 from mantis.fundamental.application.app import instance
 from mantis.fundamental.service import ServiceBase
 from mantis.fundamental.basetype import ValueEntry
-from .types import ServiceType,TradeAccountInfo
+from .types import ServiceType,TradeAccount
 from .table import ServiceRuntimeTable
 
 class TimedTask(object):
@@ -78,22 +78,23 @@ class ServicePropertyFrontService(object):
 class ServicePropertyMarketAdapter(object):
     SubscribeContracts  = ValueEntry('subscribe_contracts',u'准备订阅的合约编号')
 
-class TradeFrontServiceTraits(TradeAccountInfo):
+class TradeFrontServiceTraits():
     def __init__(self):
-        TradeAccountInfo.__init__(self)
-
+        # TradeAccountInfo.__init__(self)
+        pass
 
     def syncDownServiceConfig(self):
-        self.product_class  = self.cfgs_remote.get(ServicePropertyFrontService.ProductClass.v)
-        self.gateway  = self.cfgs_remote.get(ServicePropertyFrontService.Gateway.v)
-        self.exchange        = self.cfgs_remote.get(ServicePropertyFrontService.Exchange.v)
-        self.broker         = self.cfgs_remote.get(ServicePropertyFrontService.Broker.v)
-        self.user           = self.cfgs_remote.get(ServicePropertyFrontService.User.v)
-        self.password       = self.cfgs_remote.get(ServicePropertyFrontService.Password.v)
-        self.market_server_addr = self.cfgs_remote.get(ServicePropertyFrontService.MarketServerAddress.v)
-        self.trade_server_addr  = self.cfgs_remote.get(ServicePropertyFrontService.TradeServerAddress.v)
-        self.auth_code  = self.cfgs_remote.get(ServicePropertyFrontService.AuthCode.v)
-        self.user_product_info  = self.cfgs_remote.get(ServicePropertyFrontService.UserProductInfo.v)
+        # self.product_class  = self.cfgs_remote.get(ServicePropertyFrontService.ProductClass.v)
+        # self.gateway  = self.cfgs_remote.get(ServicePropertyFrontService.Gateway.v)
+        # self.exchange        = self.cfgs_remote.get(ServicePropertyFrontService.Exchange.v)
+        # self.broker         = self.cfgs_remote.get(ServicePropertyFrontService.Broker.v)
+        # self.user           = self.cfgs_remote.get(ServicePropertyFrontService.User.v)
+        # self.password       = self.cfgs_remote.get(ServicePropertyFrontService.Password.v)
+        # self.market_server_addr = self.cfgs_remote.get(ServicePropertyFrontService.MarketServerAddress.v)
+        # self.trade_server_addr  = self.cfgs_remote.get(ServicePropertyFrontService.TradeServerAddress.v)
+        # self.auth_code  = self.cfgs_remote.get(ServicePropertyFrontService.AuthCode.v)
+        # self.user_product_info  = self.cfgs_remote.get(ServicePropertyFrontService.UserProductInfo.v)
+        pass
 
     def convertToVnpyGatewayConfig(self):
         cfgs = dict( userID = self.user,
@@ -136,7 +137,7 @@ class TradeService(ServiceBase):
         self.cfgs = cfgs
         self.table = ServiceRuntimeTable() #.instance()
         conn = instance.datasourceManager.get('redis').conn
-        ServiceRuntimeTable().setRedis(conn)
+        self.table.setRedis(conn)
 
         host = 'localhost'
         pid = os.getpid()
@@ -216,3 +217,4 @@ class TradeService(ServiceBase):
         self.table.updateServiceConfigValues(self.getServiceId(),self.getServiceType(),
                                              **dict_
                                              )
+

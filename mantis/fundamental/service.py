@@ -46,6 +46,7 @@ class ServiceManager(object):
             # service.init(cfg,logger= instance.getLogger())
             service.init(cfg)
             self.services[name] = service
+            print 'Initing Serivce: {} ..'.format(name)
 
 
     def start(self):

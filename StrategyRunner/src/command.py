@@ -5,73 +5,79 @@ import base64
 import yaml
 import json
 from mantis.fundamental.application.app import  instance
-from mantis.trade.strategy import DevelopUserStrategyKeyPrefix,TradeUserStrategyKeyPrefix
-from mantis.trade.strategy import StrategyTask,StrategyInfo
-from mantis.trade.types import TradeUserInfo,TradeSubAccountInfo,TradeAccountInfo
+from mantis.trade.strategy import StrategyTask
+from mantis.trade.constants import *
 
-MAIN_FILE_CONTENT="""
-#coding: utf-8
+MAIN_FILE_CONTENT='''# coding:utf-8
 
-context = None  #
+# context: Context
+context = None
 
 def init(ctx):
-    pass
+    #  See : demo/config.yaml
+    print ctx.task.strategy.configs
 
 def start(ctx):
-    pass
+    print 'strategy: start()..'
+    ctx.controller.setTimer(user='ctp',timeout=2)
+    symbols = ctx.task.strategy.params.get('sub_ticks','').split(',')
+    # ctx.controller.subTicks(symbols[0])
+    ctx.controller.subBars(symbols[0],'5m')
 
 def stop(ctx):
-    pass
+    print 'strategy: stop()..'
 
 
 def onTick(tick,ctx):
-    pass
+    """
+    tick - mantis.trade.types.TickData
+    """
+    print 'strategy: onTick()..'
+    print 'tick:',tick.symbol
+    print 'tick.data', tick.data
 
 def onTrade(trade,ctx):
-    pass
+    print 'strategy: onTrade()..'
 
 def onBar(bar,ctx):
-    pass
+    """
+    bar - mantis.trade.types.BarData()
+    """
+    print 'strategy: onBar()..'
+    print 'bar:',bar.symbol,bar.scale
+    print 'bar.data:',bar.data
 
 def onTimer(timer,ctx):
-    pass 
+    # print 'strategy: onTimer()..',timer.timeout,timer.user
+    pass
 
-"""
+'''
 
 STRATEGY_CONFIG_FILE="""
 # config.yaml
 # 策略的运行配置参数
 
 name: 'demo'
-
-trade_account:
-  product_class: 'FUTURE'
-  gateway:  'CTP'
-  broker: ''
-  user: ''
-  password: ''
-  market_server_addr: ''
-  trade_server_addr: ''
-  auth_code: ''
-  user_product_info: ''
-
-trade_sub_account:
-  account: ''
-  fund_limit: 0
-
-trade_user:
-  user: ''
-  password: ''
-
+user: 'scott'           # 交易用户名称
+quotas:                 # 分配的资金账号
+  - name:   'q001'      # 配额名称
+    account: 'htqh-01' # 资金账户名称
+    product: 'future'   # 期货、股票
+    limit:  2000000     # 资金最大配额
 strategy:
-  strategy_id: ''
-  params:
-  configs:
-  extras:
+  id: ''
+  configs:      # 此处由开发人员自行配置
+    sub_ticks: 'AP810,RM809'
+    sub_bar_1m: 'AP810,RM809'
+    sub_bar_5m: 'AP810,RM809'
+
+  codes:
+  sum:
   
 """
 
-# UserStrategyKeyPrefix = DevelopUserStrategyKeyPrefix
+DevelopUserQuotaPrefix = "development.users.{user}.quotas."
+TradeUserQuotaPrefix = "trade.users.{user}.quotas."
 
 def get_username():
     return 'scott'
@@ -149,49 +155,72 @@ def remove(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     redis.delete(key)
     print 'Remove Strategy:{} Successful.'.format(name)
 
-def pull(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
+def pull(strategy_name,strategy_key=DevelopUserStrategyKeyPrefix):
     """
     pull strategy stuff to local from reposistory
     :param name:
-    :param UserStrategyKeyPrefix
+    :param strategy_key
     :return:
     """
     redis = instance.datasourceManager.get('redis').conn
-    key = UserStrategyKeyPrefix.format(user=get_username(),
-                                              strategy_name=name)
+
+    # - 1.加载用户策略 -
+    key = strategy_key.format(user=get_username(),strategy_name=strategy_name)
     cfgs = redis.hgetall(key)
     if not cfgs:
-        print 'Error: Strategy:{} not be found.'.format(name)
+        print 'Error: Strategy:{} not be found.'.format(strategy_name)
         return
+
+    # cfgs['strategy'] = json.loads(cfgs['strategy'])
+    cfgs['strategy'] = yaml.safe_load(cfgs['strategy'])
+
+    # - 2.加载用户配额设置 -
+    if strategy_key == DevelopUserStrategyKeyPrefix:
+        key = DevelopUserQuotaPrefix
+    else:
+        key = TradeUserQuotaPrefix
+
+    key = key.format(user = get_username()) + '*'
+    names = redis.keys(key)
+
+    cfgs['quotas'] = []
+
+    for name in names:
+        # qname = name.split(key)[1]  # quota's name
+        quota = redis.hgetall(name)
+        cfgs['quotas'].append(quota)
+
+    # -- end --
 
     task = StrategyTask()
     task.loads(cfgs)
 
-    # 依次创建策略包和相关文件
-    path = os.path.join(instance.getHomePath(), 'src/strategies', name)
-    os.mkdir(path)
-
-    # pull all strategy-codes from repository down to local project .
+    # 创建策略的代码和配置文件
+    path = os.path.join(instance.getHomePath(), 'src/strategies', strategy_name)
+    if not os.path.exists(path):
+        os.mkdir(path)
+    # 写入文件
     for moduleName,content in task.strategy.codes.items():
         filename = os.path.join(path,moduleName)
         fp = open(filename,'w')
         content = base64.b64decode(content)
         fp.write(content)
         fp.close()
-
+    # 删除 codes 属性
     if cfgs.get('strategy',{}).has_key('codes'):
         del cfgs.get('strategy',{})['codes']
 
-    stream = yaml.dump(cfgs,default_flow_style=False)
+    # 写入配置文件 config.yaml
+    stream = yaml.dump(cfgs,default_flow_style=False,allow_unicode=True,indent =True)
     filename = os.path.join(path,'config.yaml')
     fp = open(filename,'w')
     fp.write(stream)
     fp.close()
 
-    path = os.path.join(instance.getHomePath(), 'src/strategies', name)
-    print 'Strategy: {} Pull Successful. \n{}'.format(name,path)
+    path = os.path.join(instance.getHomePath(), 'src/strategies', strategy_name)
+    print 'Strategy: {} Pull Successful. \n{}'.format(strategy_name,path)
 
-def upload(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
+def upload(name,strategy_key=DevelopUserStrategyKeyPrefix):
     """
     put all stragegy files into repository
     将本地的策略推送到仓库
@@ -200,8 +229,8 @@ def upload(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
     :return:
     """
     redis = instance.datasourceManager.get('redis').conn
-    key = UserStrategyKeyPrefix.format(user=get_username(),strategy_name=name)
 
+    key = strategy_key.format(user=get_username(),strategy_name=name)
     path = os.path.join(instance.getHomePath(), 'src/strategies', name)
     filename = os.path.join(path,'config.yaml')
 
@@ -210,8 +239,7 @@ def upload(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
         print 'Error: config.yaml not be found.'
         return
 
-    # 扫描本地策略相关的文件
-    # 多文件读取base64编码之后塞入 .codes 属性
+    # 扫描本地策略相关的文件,多文件读取base64编码之后塞入 .codes 属性
     files = os.listdir(path)
     codes = {}
     for file_ in files:
@@ -220,34 +248,48 @@ def upload(name,UserStrategyKeyPrefix=DevelopUserStrategyKeyPrefix):
         codes[file_] = content
 
     cfgs['strategy']['codes'] = codes
-    cfgs['trade_account'] = json.dumps(cfgs['trade_account'])
-    cfgs['trade_sub_account'] = json.dumps(cfgs['trade_sub_account'])
-    cfgs['trade_user'] = json.dumps(cfgs['trade_user'])
     cfgs['strategy'] = json.dumps(cfgs['strategy'])
 
-    # 推送到redis 策略仓库
+    # 删除 quotas
+    quotas = {}
+    if cfgs.has_key('quotas'):
+        quotas = cfgs['quotas']
+        del cfgs['quotas']
+    # 写入用户的策略配置
     redis.hmset(key,cfgs)
+
+    # 单独写入用户的配额参数
+
+    dict_ = {}
+    for q in quotas:
+        qname = TradeAdapterServiceIdFormat.format(product = q['product'],account= q['account'])
+        if strategy_key == DevelopUserStrategyKeyPrefix:
+            key = DevelopUserQuotaPrefix
+        else:
+            key = TradeUserQuotaPrefix
+        key = key.format(user = get_username()) + qname
+        redis.hmset(key, q)
 
     print 'Strategy: {}  UpLoad Successful.'.format(name)
 
-def run_local_name(name,KeyPrefix):
+def run_local_name(name,KeyPrefix,service):
     """
-    > run --name=s1
+    > run s1
     :param name:
     :param KeyPrefix:
     :return:
     """
     # run local strategy
     # 本地开发运行策略
-    main = instance.serviceManager.get('main')
+    main = service
     main.controller.loadStrategy(name) # 加载策略目录下的指定策略名称的启动模块
     main.controller.open() # 开始
-    print 'Strategy: {}  Begin To Run..'.format(name)
+    print 'Strategy: {}  start running..'.format(name)
 
 
-def run_server_strategy_id(sid):
+def run_server_strategy_id(sid,service):
     """
-    > run --sid=s1
+    > run --remote s1
     :param sid:
     :return:
     """
@@ -256,4 +298,4 @@ def run_server_strategy_id(sid):
     KeyPrefix = TradeUserStrategyKeyPrefix
     # run strategy in repository
     pull(sid,KeyPrefix)
-    run_local_name(sid,KeyPrefix)
+    run_local_name(sid,KeyPrefix,service)

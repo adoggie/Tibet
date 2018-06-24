@@ -18,11 +18,13 @@ def str_to_timestamp(time_str):
 # str_to_timestamp(datetimestring)
 
 def timestamp_current():
-    return time.time()
+    return int(time.time())
 
 def timestamp_to_str(ts, fmt='%Y-%m-%d %H:%M:%S'):
     return time.strftime(fmt, time.localtime(ts))
 
+def datetime_to_timestamp(dt):
+    return int(time.mktime(dt.timetuple()))
 
 def get_across_days(start,end):
     """ 计算 start,end （timestamp) 跨越的日期(天)集合

@@ -326,8 +326,13 @@ class FlaskService( ServiceBase):
 
 
     def stop(self):
+        from mantis.fundamental.application.use_gevent import USE_GEVENT
+
         if self.server:
-            self.server.stop()
+            if USE_GEVENT:
+                self.server.stop()
+            else:
+                self.server.shutdown()
 
     def registerBlueprint(self,bp,url):
         self.app.register_blueprint( bp , url_prefix= url )
