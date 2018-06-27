@@ -1,0 +1,5 @@
+
+2018.6.27
+=====
+[ unresolved ] 1. logger : cann't output logs on console,file,and so on..
+   mantis/fundamental/logging/logger.py

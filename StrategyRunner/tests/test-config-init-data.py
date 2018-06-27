@@ -49,7 +49,7 @@ for cfg in cfgs.get('users'):
     quotas = cfg['quotas']
     dict_ = {}
     for q in quotas:
-        name = TradeAdapterServiceIdFormat.format(q['product'], q['account'])
-        key = KEYACC.format(user=cfg['name'],name= name)
+        name = TradeAdapterServiceIdFormat.format(product=q['product'],account= q['account'])
+        key = KEYACC.format(user=cfg['name'],account= name)
         ds.conn.hmset(key,q)
 

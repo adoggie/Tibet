@@ -268,8 +268,20 @@ class FlaskService( ServiceBase):
     #             debug = http.get('debug',True),
     #             process = http.get('process',1))
 
-    def start(self, block=True):
+    def select_address(self):
+        """
+        修正http侦听地址 ， 如果port未定义或者为0 ，则进行动态选定端口
+        :return:
+        """
+        from mantis.fundamental.utils.network import select_address_port
+        http = self.cfgs.get('http')
+        start = 18900
+        end = 18950
+        address = select_address_port(http.get('host'),start,end)
+        self.cfgs.get('http')['port'] = address[1]
 
+    def start(self, block=True):
+        self.select_address()
         self.thread = Thread(target= self.runThread)
         self.thread.start()
 
@@ -295,9 +307,8 @@ class FlaskService( ServiceBase):
         # else:
         #     self.server = pywsgi.WSGIServer((host,port),app)
         #     self.server.start()
-
-        self.logger.info( 'Service: %s started, Listen on %s:%s ...' % (self.name, host, port) )
         if block:
+            self.logger.info('Service: %s started, Listen on %s:%s ...' % (self.name, host, port))
             self.server.serve_forever()
 
     def runThread(self):
@@ -321,7 +332,7 @@ class FlaskService( ServiceBase):
         #     self.server.start()
 
         self.logger.info('Service: %s started, Listen on %s:%s ...' % (self.name, host, port))
-
+        # print 'xxxx-Service: %s started, Listen on %s:%s ...' % (self.name, host, port)
         self.server.serve_forever()
 
 

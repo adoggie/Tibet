@@ -4,11 +4,8 @@ import json
 from collections import OrderedDict
 from mantis.fundamental.utils.useful import hash_object,object_assign
 from mantis.trade.types  import TradeAccountQuota
+from mantis.trade.constants import  *
 
-class StrategyRunMode(object):
-    Null        = 'null'
-    Development = 'dev'
-    Product     = 'product'
 
 
 class StrategyTask(object):

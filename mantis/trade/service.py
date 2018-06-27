@@ -2,12 +2,15 @@
 
 import time
 import os
+import string
 from threading import Thread
 from mantis.fundamental.application.app import instance
 from mantis.fundamental.service import ServiceBase
 from mantis.fundamental.basetype import ValueEntry
 from .types import ServiceType,TradeAccount
 from .table import ServiceRuntimeTable
+from mantis.trade.constants import *
+from mantis.trade.message import *
 
 class TimedTask(object):
     SECOND = 1
@@ -38,9 +41,6 @@ class ServiceRunStatus(object):
     STOPPED = 'stopped'
     RUNNING = 'running'
     PAUSED  = 'paused'
-
-
-
 
 class ServiceCommonProperty(object):
     ServiceId   = ValueEntry('service_id',u'系统编号')
@@ -96,19 +96,19 @@ class TradeFrontServiceTraits():
         # self.user_product_info  = self.cfgs_remote.get(ServicePropertyFrontService.UserProductInfo.v)
         pass
 
-    def convertToVnpyGatewayConfig(self):
-        cfgs = dict( userID = self.user,
-                     password = self.password,
-                     brokerID = self.broker,
-                     tdAddress = self.trade_server_addr,
-                     mdAddress = self.market_server_addr
-                     )
-        if self.auth_code:
-            cfgs['authCode'] = self.auth_code
-
-        if self.user_product_info:
-            cfgs['userProductInfo'] = self.user_product_info
-        return cfgs
+    # def convertToVnpyGatewayConfig(self):
+    #     cfgs = dict( userID = self.user,
+    #                  password = self.password,
+    #                  brokerID = self.broker,
+    #                  tdAddress = self.trade_server_addr,
+    #                  mdAddress = self.market_server_addr
+    #                  )
+    #     if self.auth_code:
+    #         cfgs['authCode'] = self.auth_code
+    #
+    #     if self.user_product_info:
+    #         cfgs['userProductInfo'] = self.user_product_info
+    #     return cfgs
 
 class TradeService(ServiceBase):
     def __init__(self,name):
@@ -126,6 +126,14 @@ class TradeService(ServiceBase):
         self.fanout_switchers ={}
 
         self.logger = None
+
+        self.channels = {}
+        # 服务本地数据通道 :  get,sub,pub
+        # get - 消息接收通道，消息持久不会丢失
+        # sub - 消息接收通道, 消息丢失,只接收最新消息
+        # pub - 消息发布通道, 外部用户订阅接收最新消息
+        # put - 消息发布通道， 外部用户一次接收消息不丢失
+
 
     def getServiceId(self):
         return self.service_id
@@ -154,6 +162,56 @@ class TradeService(ServiceBase):
         self.table.updateServiceConfigValues(self.getServiceId(), self.getServiceType(),**dict_)
 
         self.syncDownServiceConfig()
+        # self.initCommandChannels()
+
+    def initCommandChannels(self):
+        """初始化命令通道，用于本地服务接收和发送消息"""
+        channels = map(string.strip,self.cfgs.get('init_channels','get,sub,pub,put').strip().split(','))
+
+        if 'get' in channels:
+            addr = ServiceCommandChannelAddressGet.format(service_type=self.service_type,service_id = self.service_id)
+            chan = self.createServiceCommandChannel(addr,self.handle_channel_get,open=True)
+            self.registerCommandChannel('get',chan)
+        if 'sub' in channels:
+            addr = ServiceCommandChannelAddressSub.format(service_type=self.service_type,service_id = self.service_id)
+            chan = self.createServiceCommandChannel(addr,self.handle_channel_sub,open=True)
+            self.registerCommandChannel('sub',chan)
+
+        if 'pub' in channels:
+            addr = ServiceCommandChannelAddressPub.format(service_type=self.service_type, service_id=self.service_id)
+            chan = self.createServiceCommandChannel(addr, open=True)
+            self.registerCommandChannel('pub', chan)
+
+        if 'put' in channels:
+            addr = ServiceCommandChannelAddressPut.format(service_type=self.service_type, service_id=self.service_id)
+            chan = self.createServiceCommandChannel(addr, open=True)
+            self.registerCommandChannel('put', chan)
+
+    def registerCommandChannel(self,name,channel):
+        self.channels[name] = channel
+
+    def createServiceCommandChannel(self,name,handler=None,open=False):
+        """
+        创建远程服务的消息收发通道
+        :param name:   ds/channel_name/pubsub or queue
+        :param handler:
+        :return:
+        """
+        brokername, address, type_ = name.split('/')
+        broker = instance.messageBrokerManager.get(brokername)
+        channel = broker.createChannel(address, handler=handler, type_=type_)
+        if open:
+            channel.open()
+        return channel
+
+
+    def handle_channel_get(self,data,ctx):
+        """处理发送进入的请求 , 数据队列式，不丢失"""
+        pass
+
+    def handle_channel_sub(self, data, ctx):
+        """处理发送进入的请求 , 数据订阅式，丢失"""
+        pass
 
     def initFanoutSwitchers(self,cfgs):
         from .fanout import FanoutSwitcher
@@ -174,7 +232,7 @@ class TradeService(ServiceBase):
         self.cfgs_remote = cfgs
 
     def start(self):
-
+        self.initCommandChannels()
         self.registerTimedTask(self.updateLiveStatus,self)
         self._thread = Thread(target=self._run)
         self._thread.start()
@@ -217,4 +275,3 @@ class TradeService(ServiceBase):
         self.table.updateServiceConfigValues(self.getServiceId(),self.getServiceType(),
                                              **dict_
                                              )
-

@@ -250,7 +250,7 @@ class EventEngine(object):
             event = Event(type_=EVENT_TIMER)
         
             # 向队列中存入计时器事件
-            # self.put(event)
+            self.put(event)
             # todo. comments above line(scott)
             # 等待
             sleep(self.__timerSleep)

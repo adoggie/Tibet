@@ -4,85 +4,47 @@ import traceback
 import json
 from collections import OrderedDict
 
-class Request(object):
-    def __init__(self, name='', data={},ref_id='',back_url=''):
-        self.type       = 'request'
+
+
+class Message(object):
+    def __init__(self, name='', data={},head={}):
         self.name       = name
         self.data       = data
-        self.header     = {'ref_id':ref_id,'back_url':back_url}
-
+        self.head     = head
 
     def marshall(self):
-        message = OrderedDict(type='request',name = self.name,
-                              header=self.header,
-                              body=self.data
+        message = OrderedDict(name = self.name,
+                              head = self.head,
+                              data = self.data
                               )
         return json.dumps(message)
 
-    def send(self,channel):
-        channel.publish_or_produce(self.marshall())
-
     @staticmethod
     def unmarshall(data):
-
         if not isinstance(data,dict):
             data = json.loads(data)
 
-        req = None
+        msg = None
         try:
-            req = Request()
-            req.name = data.get('name','')
-            req.data = data.get('body',{})
-            req.ref_id = data.get('header',{}).get('ref_id','')
-            req.back_url = data.get('header',{}).get('back_url','')
+            msg = Message()
+            msg.name = data.get('name','')
+            msg.data = data.get('data',{})
+            msg.head = data.get('head',{})
         except:
             traceback.print_exc()
-            req = None
-        return req
+            msg = None
+        return msg
 
+class Request(object):
+    def __init__(self, channel,back_url=''):
+        self.channel = channel
+        self.back_url = back_url
 
-class Response(object):
-    def __init__(self,data ={} ,request =None):
-        self.type       = 'response'
-        self.data       = data
-        self.header     = {'ref_id',''}
-        self.name       = ''
-        if request:
-            self.header = request.header
-            self.name   = request.name
+    def send(self,message):
+        if isinstance(message,Message):
+            if self.back_url:
+                message.head['back_url'] = self.back_url
+            self.channel.publish_or_produce(message.marshall())
+        else:
+            self.channel.publish_or_produce(message)
 
-
-    def marshall(self):
-
-        message = OrderedDict(type='response',
-                              name = self.name,
-                              header=self.header,
-                              body=self.data
-                              )
-        return json.dumps(message)
-
-    @staticmethod
-    def unmarshall(data):
-        if not isinstance(data, dict):
-            data = json.loads(data)
-
-        resp = None
-        try:
-            resp = Request()
-            resp.name = data.get('name', '')
-            resp.data = data.get('body', {})
-            resp.ref_id = data.get('header', {}).get('ref_id', '')
-        except:
-            traceback.print_exc()
-            resp = None
-        return resp
-
-class RequestOrResponse(object):
-    @staticmethod
-    def parse(data):
-        message = json.loads(data)
-        if message.get('type') == 'request':
-            return Request.unmarshall(message)
-        if message.get('type') == 'response':
-            return Response.unmarshall(message)
-        return None

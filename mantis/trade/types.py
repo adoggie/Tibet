@@ -85,6 +85,7 @@ class TradeAccountQuota(object):
         self.product = ProductClass.Undefined
         self.props = {}
         self.channels = {}  # 交互通道
+        self.trade_proxy = None # 交易代理对象
 
     def dumps(self):
         result = dict( name = self.name, account = self.account , limit = self.limit)
@@ -140,29 +141,34 @@ class TradeUserInfo(object):
         result = hash_object(self)
         return result
 
+# class DataBase(object):
+#     def __init__(self):
+#         self.gateway = ''
+#         self.handler = None  # ProductHandler
+#         self.product = ''
+#
+# class TickData(object):
+#     def __init__(self):
+#         self.symbol = ''
+#         self.data = {}
+#
+#
+# class BarData(object):
+#     def __init__(self):
+#         self.data = {}
+#         self.symbol = ''
+#         self.scale = '' # 1m,5m,..,1h,1d...
+#         self.gateway =''
+#         self.handler = None    # ProductHandler
+#         self.product = ''
 
-class TickData(object):
-    def __init__(self):
-        self.symbol = ''
-        self.data = {}
-        self.gateway = ''
-        self.handler = None   # ProductHandler
-        self.product = ''
 
-class BarData(object):
-    def __init__(self):
-        self.data = {}
-        self.symbol = ''
-        self.scale = '' # 1m,5m,..,1h,1d...
-        self.gateway =''
-        self.handler = None    # ProductHandler
-        self.product = ''
 
-class FutureTradeCommand(object):
-    ORDER_SELL = 'order_sell'
-    ORDER_SHORT = 'order_short'
-    ORDER_COVER = 'order_cover'
-
+# class FutureTradeCommand(object):
+#     ORDER_SELL = 'order_sell'
+#     ORDER_SHORT = 'order_short'
+#     ORDER_COVER = 'order_cover'
+#
 
 
 

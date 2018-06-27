@@ -48,17 +48,17 @@ class MarketService(TradeService, TradeFrontServiceTraits):
         TradeService.syncDownServiceConfig(self)
         TradeFrontServiceTraits.syncDownServiceConfig(self)
 
-        cfg_gateway = self.cfgs.get('gateway')
-        self.product_class = 'FUTURES'  # self.cfgs_remote.get(ServicePropertyFrontService.ProductClass.v)
-        self.exchange = cfg_gateway.get('name')
-        self.gateway = cfg_gateway.get('name')
-        self.broker = cfg_gateway.get('brokerID')
-        self.user = cfg_gateway.get('userID')
-        self.password = cfg_gateway.get('password')
-        self.market_server_addr = cfg_gateway.get('mdAddress')
-        self.trade_server_addr = cfg_gateway.get('tdAddress')
-        self.auth_code = cfg_gateway.get('authCode')
-        self.user_product_info = cfg_gateway.get('userProductInfo')
+        # cfg_gateway = self.cfgs.get('gateway')
+        # self.product_class = 'FUTURES'  # self.cfgs_remote.get(ServicePropertyFrontService.ProductClass.v)
+        # self.exchange = cfg_gateway.get('name')
+        # self.gateway = cfg_gateway.get('name')
+        # self.broker = cfg_gateway.get('brokerID')
+        # self.user = cfg_gateway.get('userID')
+        # self.password = cfg_gateway.get('password')
+        # self.market_server_addr = cfg_gateway.get('mdAddress')
+        # self.trade_server_addr = cfg_gateway.get('tdAddress')
+        # self.auth_code = cfg_gateway.get('authCode')
+        # self.user_product_info = cfg_gateway.get('userProductInfo')
 
     def setupFanoutAndLogHandler(self):
         from mantis.trade.log import TradeServiceLogHandler
@@ -90,11 +90,18 @@ class MarketService(TradeService, TradeFrontServiceTraits):
         le.info(u'注册日志事件监听')
 
         self.registerEvent()
-        # cfgs = self.cfgs.get('gateway',{}) # 本地加载
-        cfgs = self.convertToVnpyGatewayConfig()
-        self.mainEngine.connect(self.gateway, cfgs)
+        cfgs = self.cfgs.get('gateway',{}) # 本地加载
+        # cfgs = self.convertToVnpyGatewayConfig()
+        self.mainEngine.connect(ctpGateway.gatewayName, cfgs)
 
         le.info(u'连接CTP接口')
+
+    def initCommandChannels(self):
+        """默认不启用通道"""
+        pass
+
+    def handle_channel_read(self,data,ctx):
+        pass
 
     def processLogEvent(self, event):
         print event
@@ -170,7 +177,7 @@ class MarketService(TradeService, TradeFrontServiceTraits):
         for symbol in self.contracts.keys():
             req = VtSubscribeReq()
             req.symbol = symbol
-            self.mainEngine.subscribe(req, self.gateway)  # CTP
+            self.mainEngine.subscribe(req,'CTP')  # CTP
 
     def processContractEvent(self, event):
         """处理合约事件

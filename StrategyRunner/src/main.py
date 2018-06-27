@@ -135,18 +135,10 @@ class StrategyRunner(TradeService):
         # if self.active:
         #     self.active = False
 
-    # def join(self):
-    #     self.thread.join()
-    #
-    # def threadDataFanout(self):
-    #     """运行插入线程"""
-    #     while self.active:
-    #         try:
-    #             print 'current tick queue size:', self.queue.qsize()
-    #             # dbName, collectionName, d = self.queue.get(block=True, timeout=1)
-    #             tick  = self.queue.get(block=True, timeout=1)
-    #             symbol = tick.vtSymbol
-    #             self.dataFanout('switch0',tick.__dict__,symbol = symbol)
-    #
-    #         except Exception as e:
-    #             self.logger.error( str(e) )
+    def initCommandChannels(self):
+        TradeService.initCommandChannels(self)
+        channel = self.createServiceCommandChannel(CommandChannelTradeAdapterLauncherSub,open=True)
+        self.registerCommandChannel('trade_adapter_launcher',channel)
+
+    def handle_channel_read(self,data,ctx):
+        pass

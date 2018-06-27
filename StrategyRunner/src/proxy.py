@@ -4,6 +4,9 @@ from mantis.fundamental.application.app import instance
 from mantis.fundamental.utils.useful import singleton
 from mantis.trade.types import TimeDuration,ProductClass
 from mantis.trade.errors import ErrorDefs
+import grequests
+from mantis.trade import command
+from mantis.trade.message import  *
 
 
 @singleton
@@ -35,32 +38,7 @@ class DataResServiceProxy(object):
         pass
 
 
-class TradeAdapterProxy(object):
-    """对应资金账户"""
-    def __init__(self):
-        pass
 
-
-@singleton
-class TradeServiceProxy(object):
-    """资金交易管理服务"""
-    def __init__(self):
-        self.adapters = {} #
-        """
-        product_class:
-          gateway_name:
-            user
-              password
-              mdAddress
-        
-        examples:
-        future.ctp
-            u001:
-        
-        """
-
-    def openAccount(self):
-        """"""
 
 @singleton
 class PAServiceProxy(object):
@@ -72,4 +50,57 @@ class PAServiceProxy(object):
     目前在无接口提供功能
     """
     def __init__(self):
+        pass
+
+
+class TradeAdapterProxy(object):
+    """对应资金账户"""
+    def __init__(self,http):
+        """
+        :param http: 服务web访问地址前缀
+        http://192.168.1.1:8800/v1/message/
+        """
+        self.http = http
+
+    def getOrder(self,order_id):
+        """查询委托"""
+        data = command.GetOrder()
+        data.order_id = order_id
+        msg = Message(command.GetOrder.NAME,data=data.__dict__)
+        try:
+            resp = grequests.post(self.http,data = msg.marshall())
+            result = command.GetOrder.Result()
+            result.assign(resp.json)
+            return result.order
+        except:
+            traceback.print_exc()
+        return None
+
+    def getAllWorkingOrders(self):
+        """查询所有活动委托（返回列表）"""
+        pass
+
+    def getAllTrades(self):
+        """获取所有成交"""
+        return self.tradeDict.values()
+
+    # ----------------------------------------------------------------------
+    def getAllPositions(self):
+        """获取所有持仓"""
+        return self.positionDict.values()
+
+    # ----------------------------------------------------------------------
+    def getAllAccounts(self):
+        """获取所有资金"""
+        # return self.accountDict.values()
+        pass
+    # ----------------------------------------------------------------------
+    def getPositionDetail(self, vtSymbol):
+        pass
+
+    def getAllPositionDetails(self):
+        """查询所有本地持仓缓存细节"""
+        return self.detailDict.values()
+
+    def sendOrder(self,order_req,strategy_id):
         pass

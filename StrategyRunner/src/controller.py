@@ -8,10 +8,11 @@ from mantis.trade.types import TimeDuration,BarData,TickData,ProductClass
 from mantis.fundamental.application.app import instance
 from mantis.trade.strategy import StrategyTask
 from context import Context
-from proxy import DataResServiceProxy,TradeServiceProxy,PAServiceProxy
+from proxy import DataResServiceProxy,PAServiceProxy
 from symbol import SymbolTable
 from handler import FutureHandler,StockHandler
 from mantis.trade.constants import *
+from mantis.trade import command
 
 from mantis.trade import utils
 
@@ -103,21 +104,12 @@ class StrategyController(object):
             self.startTradeAdapter(quota.account,quota.product)
 
     def startTradeAdapter(self,account,product):
-        # 1. 检测交易适配器是否已启动
-        # service_id = TradeAdapterServiceIdFormat.format(product=product,account=account)
-        # values = self.service.table.getServiceConfigValues(service_id,ServiceType.TradeAdapter)
-        # alive = utils.is_service_alive(values.get('live_time',0))
 
-        # 2. 未启动则请求adapter launcher 加载 adapter
-        # if not alive:
-        #     msg = Request(name = SystemCommand.StartTradeAdapter)
-        #     msg.data =
-
-        # 3. 启动定时器，要求tradeadapter保持运行
-
-        msg = Request(name=SystemCommand.StartTradeAdapter)
+        msg = Message(name= command.StartTradeAdapter.NAME)
         msg.data = dict( product = product,account = account)
-        self.sendChannelMessage(CommandChannelTradeAdapterLauncherREAD,msg.marshall())
+        channel = self.service.channels.get('trade_adapter_launcher')
+        Request(channel).send(msg.marshall())
+
 
 
     def sendChannelMessage(self,channel_name,message,broker_name='redis',channel_type='pubsub'):

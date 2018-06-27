@@ -162,7 +162,7 @@ class CtpGateway(VtGateway):
         userProductInfo = None
 
         # 如果json文件提供了验证码
-        if setting.has_key('authCode'):
+        if setting['authCode']:
             authCode = setting.get('authCode')
             userProductInfo = setting.get('userProductInfo')
             self.tdApi.requireAuthentication = True

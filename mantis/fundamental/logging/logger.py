@@ -121,6 +121,11 @@ class Logger:
                 - string 'HOP,TRANS:A10021'
         :return:
         """
+        # todo. logging bug need for fixing
+        # self.logger.log(level,args[0],*args[1:])
+        print level,args[0]%args[1:]
+        return
+
         if type(level) in (str,unicode):
             level = Logger.convertLevelToIntValue(level)
         extra = self.fmt_extra.copy()

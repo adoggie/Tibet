@@ -14,22 +14,25 @@ accounts:                 # 分配的资金账号
     product: 'future'
     comment: '海通期货'
     gateway: 'CTP'
-    broker: '9999'
-    user: '113967'
-    password: 'loginmm6688'
-    market_server_addr: 'tcp://180.168.146.187:10011'
-    trade_server_addr: 'tcp://180.168.146.187:10001'
-    auth_code: ''
-    user_product_info: ''
+
+    brokerID:   "9999"
+    mdAddress:  "tcp://180.168.146.187:10011"  # real time
+    tdAddress:  "tcp://180.168.146.187:10001"
+    userID:     "113967"
+    password:  "loginmm6688"
+    comments:  "交易服务器地址可以不设置,仅仅使用行情接收功能"
+    authCode:   ''
+    userProductInfo: ''
 
   - name:   'htqh-02'
     product: 'future'
     comment: '海通期货'
     gateway: 'CTP'
-    broker: '9999'
-    user: '1111'
-    password: '11111'
-    market_server_addr: 'tcp://180.168.146.187:10011'
-    trade_server_addr: 'tcp://180.168.146.187:10001'
-    auth_code: ''
-    user_product_info: ''
+    brokerID:   "9999"
+    mdAddress:  "tcp://180.168.146.187:10031"  # real time
+    tdAddress:  "tcp://180.168.146.187:10030"
+    userID:     "113967"
+    password:  "loginmm6688"
+    comments:  "交易服务器地址可以不设置,仅仅使用行情接收功能"
+    authCode:   ''
+    userProductInfo: ''
