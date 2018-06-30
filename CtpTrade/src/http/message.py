@@ -1,5 +1,6 @@
 # coding: utf-8
 
+import json
 from flask import request,g
 
 from mantis.fundamental.application.app import instance
@@ -14,7 +15,7 @@ def handle_message():
     统一处理发送进入的所有消息
     :return:
     """
-    data = request.json
+    data = request.data
     message = Message.unmarshall(data)
     if not message:
         return ErrorReturn(ErrorDefs.ParameterInvalid).response
@@ -37,7 +38,34 @@ def handle_message():
     if message.name == command.GetAllAccounts.NAME:
         return message_getAllAccounts(message)
 
+    if message.name == command.SendOrder.NAME:
+        return message_sendOrder(message)
+
+    if message.name == command.CancelOrder.NAME:
+        return message_cancelOrder(message)
+
     return ErrorReturn(ErrorDefs.ParameterInvalid).response
+
+
+def message_sendOrder(message):
+    de = instance.serviceManager.get('main').dataEngine
+    m = command.SendOrder()
+    m.__dict__ = message.data
+
+    orderIds = de.sendOrder(m)
+    cr = CR()
+    result = orderIds
+    cr.assign(result)
+    return cr.response
+
+def message_cancelOrder(message):
+    de = instance.serviceManager.get('main').dataEngine
+    m = command.CancelOrder()
+    m.__dict__ = message.data
+    result = de.cancelOrder(m.order_id)
+    if result:
+        return CR().response
+    return ErrorReturn(ErrorDefs.Error).response
 
 def message_getOrder(message):
     de = instance.serviceManager.get('main').dataEngine

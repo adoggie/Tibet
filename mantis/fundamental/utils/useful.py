@@ -93,6 +93,13 @@ def get_config_item(root,path,default=None):
         conf = default
     return conf
 
+def list_item_match(list_,name,value):
+    """return first item which matched"""
+    matched = filter(lambda x:x.get(name)==value,list_)
+    if matched:
+        return matched[0]
+    return None
+
 
 class ObjectBuilder(object):
     @staticmethod

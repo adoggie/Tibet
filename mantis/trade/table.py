@@ -26,7 +26,7 @@ class ServiceRuntimeTable(object):
 
     def configPrefixByServiceType(self,type_):
         """根据服务类型返回 key 定义前缀"""
-        return ConfigNames.get(type_,'')
+        return ConfigNames.get(str(type_),'')
 
     def getServiceIdsByType(self,type_):
         """查询指定服务类型的服务进程编号"""
@@ -37,6 +37,9 @@ class ServiceRuntimeTable(object):
         key = self.configPrefixByServiceType(type_)+'.'+service_id
         values = self.redis.hgetall(key)
         return values
+
+    def getServiceUniqueName(self,type_,service_id):
+        return self.configPrefixByServiceType(type_) + '.'+service_id
 
     def updateServiceConfigValues(self,svc_id,type_,**value):
         key = self.configPrefixByServiceType(type_) + '.' + svc_id

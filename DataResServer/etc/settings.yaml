@@ -127,7 +127,7 @@ services:
     http:
 #      host : '172.16.109.237'
       host : '127.0.0.1'
-      port : 18902
+      port : 18802
       threaded: false
       debug: true
 

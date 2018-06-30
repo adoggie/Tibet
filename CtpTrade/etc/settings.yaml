@@ -105,7 +105,7 @@ message_brokers:
         type: 'queue' # or queue
 
 services:
-  - name: 'http-subscribe'
+  - name: 'http'
     class: 'mantis.fundamental.flask.service.FlaskService'
     enable: true
     block: false
@@ -117,10 +117,12 @@ services:
       SECRET_KEY : "abc"
     http:
 #      host : '172.16.109.237'
-      host : '127.0.0.1'
+      host : '172.16.109.133'
+#      host : '127.0.0.1'
       port : 0
       threaded: false
       debug: true
+      path: '/v1/message/'
 
     blueprints:
       - package: 'http'
@@ -165,6 +167,7 @@ services:
 
     ctp_tick_filters:
       - 'filters.CtpTickValidator'
+    running_unique: True
 
 
 

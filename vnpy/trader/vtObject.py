@@ -131,6 +131,10 @@ class VtTradeData(VtBaseData):
         self.price = EMPTY_FLOAT                # 成交价格
         self.volume = EMPTY_INT                 # 成交数量
         self.tradeTime = EMPTY_STRING           # 成交时间
+
+        # scott added
+        self.account = ''                       # 期货、股票账户名称
+        self.product = ''                       # 期货还是股票 feture/stock
    
 
 ########################################################################
@@ -165,7 +169,11 @@ class VtOrderData(VtBaseData):
         self.frontID = EMPTY_INT                # 前置机编号
         self.sessionID = EMPTY_INT              # 连接编号
 
-    
+        # scott added
+        self.account = ''  # 期货、股票账户名称
+        self.product = ''  # 期货还是股票 feture/stock
+
+
 ########################################################################
 class VtPositionData(VtBaseData):
     """持仓数据类"""

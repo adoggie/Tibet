@@ -7,9 +7,10 @@ from threading import Thread
 from mantis.fundamental.application.app import instance
 from mantis.fundamental.service import ServiceBase
 from mantis.fundamental.basetype import ValueEntry
-from .types import ServiceType,TradeAccount
+from .types import ServiceType,TimeDuration
 from .table import ServiceRuntimeTable
 from mantis.trade.constants import *
+from mantis.trade import command
 from mantis.trade.message import *
 
 class TimedTask(object):
@@ -126,7 +127,7 @@ class TradeService(ServiceBase):
         self.fanout_switchers ={}
 
         self.logger = None
-
+        self.process_lock = None
         self.channels = {}
         # 服务本地数据通道 :  get,sub,pub
         # get - 消息接收通道，消息持久不会丢失
@@ -147,6 +148,9 @@ class TradeService(ServiceBase):
         conn = instance.datasourceManager.get('redis').conn
         self.table.setRedis(conn)
 
+        if not self.runningAsUniqueProcess():
+            return
+
         host = 'localhost'
         pid = os.getpid()
 
@@ -163,6 +167,7 @@ class TradeService(ServiceBase):
 
         self.syncDownServiceConfig()
         # self.initCommandChannels()
+
 
     def initCommandChannels(self):
         """初始化命令通道，用于本地服务接收和发送消息"""
@@ -239,6 +244,8 @@ class TradeService(ServiceBase):
 
     def stop(self):
         self.isclosed = True
+        if self.process_lock:
+            self.process_lock.unlock()
 
     def join(self):
         if self._thread:
@@ -275,3 +282,62 @@ class TradeService(ServiceBase):
         self.table.updateServiceConfigValues(self.getServiceId(),self.getServiceType(),
                                              **dict_
                                              )
+        self.broadcastServiceStatus()
+
+    def runningAsUniqueProcess(self):
+        """保持运行唯一进程"""
+        if not self.cfgs.get('running_unique',False):
+            return
+        result = self.tryAcquireProccessLock()
+        if not result:
+            self.logger.error('Another Process Instance Is Runing , Please Kill it ,Then Restart Me.')
+            instance.abort()
+            return False
+        self.registerTimedTask(self.keepUniqueProcessLock,timeout=TimeDuration.SECOND*1)
+        return True
+
+    def keepUniqueProcessLock(self,task):
+        """保持进程锁"""
+        result= self.process_lock.lock()
+        # print 'Process Unique Lock:',result
+
+    def tryAcquireProccessLock(self):
+        from mantis.fundamental.redis.lock import Locker
+        from mantis.fundamental.utils.useful import list_item_match
+        if not self.process_lock:
+            cfgs = list_item_match(instance.getConfig().get('datasources',[]),'name','redis')
+
+            resid = self.table.getServiceUniqueName(self.service_type, self.service_id)+'.lock'
+            servers = [dict(host=cfgs.get('host'), port=cfgs.get('port'), db=cfgs.get('db', 0))
+                       ]
+            self.process_lock = Locker(resid, ttl=TimeDuration.SECOND*5*1000,servers=servers)
+        result = self.process_lock.lock()
+        return result
+
+    def broadcastServiceStatus(self):
+        """在pub通道上广播自身服务的状态配置信息"""
+        msg = self.serviceStatusAndConfigs()
+        self.publishMessage(msg)
+
+    def serviceStatusAndConfigs(self):
+        msg = command.ServiceStatusBroadcast()
+        msg.service_id = self.service_id
+        msg.service_type = str(self.service_type)
+        service = instance.serviceManager.get('http')
+        if service:
+            http = service.cfgs.get('http',{})
+            url = 'http://{host}:{port}'.format(host=http.get('host'),port=http.get('port'))
+            msg.http = url
+        return msg
+
+    def publishMessage(self,message):
+        """
+        通过pub通道将消息发布给策略runner
+        :param data:
+        :return:
+        """
+
+        channel = self.channels.get('pub') #
+        if not channel:
+            return
+        Request(channel).send(message)

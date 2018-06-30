@@ -43,8 +43,11 @@ class FutureHandler(ProductHandler):
         self.accounts = OrderedDict()   # 持有的账户信息（配额限定)
         self.default_account = ''
         self.service = controller.service
+        self.datares_proxy = None
 
     def open(self):
+        http = self.service.getConfig().get('datares_service',{}).get('http','')
+        self.datares_proxy = DataResServiceProxy(self, http)
         self.startKeepAliveWithTradeAdapter()
 
     def close(self):
@@ -92,6 +95,7 @@ class FutureHandler(ProductHandler):
     def handle_message(self, data, ctx):
         """处理从资金接入适配器返回的消息 """
         channel = ctx['channel']
+        quota = channel.props['quota']
         message = Message.unmarshall(data)
         if not message:
             return
@@ -101,12 +105,28 @@ class FutureHandler(ProductHandler):
             account.__dict__ = message.data
 
         if message.name == command.ServiceStatusBroadcast.NAME:
+            """TradeAapter上线之后将自身的服务信息广播出来"""
             data = command.ServiceStatusBroadcast()
             data.__dict__ = message.data
             quota = channel.props.get('quota')
-            if not quota.trade_proxy: # 未定义
+            if not quota.trade_proxy or quota.trade_proxy.http != data.http: # 未定义
                 quota.trade_proxy = TradeAdapterProxy(data.http)
+                self.service.logger.info("Trade Adapter Activated:{}.{} ,{}".format(data.service_type,data.service_id,data.http))
 
+        if message.name == command.OnTradeData.NAME:
+            # 交易事件
+            data = command.OnTradeData()
+            data.__dict__ = message.data
+            data.account = quota.account
+            data.product = quota.product
+            self.controller.onTrade(data)
+
+        if message.name == command.OnOrderData.NAME:
+            data = command.OnOrderData()
+            data.__dict__ = message.data
+            data.account = quota.account
+            data.product = quota.product
+            self.controller.onOrder(data)
 
     def set_default_account(self, name):
         self.default_account = name
@@ -157,26 +177,26 @@ class FutureHandler(ProductHandler):
         data.product = self.type
         self.controller.onBar(data)
 
-    def buy(self, price, volume, stop=False, account=''):
+    def buy(self, vtSymbol,price, volume, account=''):
         """买开"""
-        return self.sendOrder(CTAORDER_BUY, price, volume, stop, account)
+        return self.sendOrder(vtSymbol,CTAORDER_BUY, price, volume,account)
 
 
-    def sell(self, price, volume, stop=False, account=''):
+    def sell(self, vtSymbol,price, volume, account=''):
         """卖平"""
-        return self.sendOrder(CTAORDER_SELL, price, volume, stop, account)
+        return self.sendOrder(vtSymbol,CTAORDER_SELL, price, volume, account)
 
         # ----------------------------------------------------------------------
 
-    def short(self, price, volume, stop=False, account=''):
+    def short(self, vtSymbol,price, volume, account=''):
         """卖开"""
-        return self.sendOrder(CTAORDER_SHORT, price, volume, stop, account)
+        return self.sendOrder(vtSymbol,CTAORDER_SHORT, price, volume, account)
 
         # ----------------------------------------------------------------------
 
-    def cover(self, price, volume, stop=False, account=''):
+    def cover(self, vtSymbol,price, volume, account=''):
         """买平"""
-        return self.sendOrder(CTAORDER_COVER, price, volume, stop, account)
+        return self.sendOrder(vtSymbol,CTAORDER_COVER, price, volume, account)
 
     def roundToPriceTick(self, priceTick, price):
         """取整价格到合约最小价格变动"""
@@ -186,20 +206,26 @@ class FutureHandler(ProductHandler):
         newPrice = round(price / priceTick, 0) * priceTick
         return newPrice
 
+    def prepare_account(self,account):
+        if not account:
+            account = self.default_account
+        quota = self.accounts.get(account)
+        # 交易适配服务未准备好，拒绝下单
+        if not quota or not quota.trade_proxy:
+            self.service.logger.error(u'quota account not found. ( {} )'.format(account))
+            return None
+        return quota
+
         # ----------------------------------------------------------------------
     def sendOrder(self, vtSymbol, orderType, price, volume, account=''):
         """发单"""
         from mantis.trade.utils import get_contract_detail
 
         # contract = self.mainEngine.getContract(vtSymbol)
-        if not account:
-            account = self.default_account
-        quota = self.accounts.get(account)
-        # 交易适配服务未准备好，拒绝下单
-        if not quota or not quota.trade_proxy:
+        quota = self.prepare_account(account)
+        if not quota:
             return []
 
-        # channel = quota.channels.get('sub')
 
         contract = VtContractData()
         contract.__dict__ = get_contract_detail(vtSymbol)
@@ -234,50 +260,63 @@ class FutureHandler(ProductHandler):
             req.direction = DIRECTION_LONG
             req.offset = OFFSET_CLOSE
 
-        req = command.OrderRequest()
         return quota.trade_proxy.sendOrder(req,self.service.service_id)
 
-
-        # 一下操作进行拆单动作，形成多个订单请求，批量发送
-        # 在这里不操作，由 TradeAdapter服务进行拆单
-
-        # 委托转换
-        # reqList = self.mainEngine.convertOrderReq(req)
-        # vtOrderIDList = []
-        #
-        # if not reqList:
-        #     return vtOrderIDList
-        #
-        # for convertedReq in reqList:
-        #     vtOrderID = self.mainEngine.sendOrder(convertedReq, contract.gatewayName)  # 发单
-        #     self.orderStrategyDict[vtOrderID] = strategy  # 保存vtOrderID和策略的映射关系
-        #     self.strategyOrderDict[strategy.name].add(vtOrderID)  # 添加到策略委托号集合中
-        #     vtOrderIDList.append(vtOrderID)
-        #
-        # self.writeCtaLog(u'策略%s发送委托，%s，%s，%s@%s'
-        #                  % (strategy.name, vtSymbol, req.direction, volume, price))
-        #
-        # return vtOrderIDList
-
-
-    def cancelOrder(self, vtOrderID):
+    def cancelOrder(self, order_id,account=''):
         """撤单"""
-        # 如果发单号为空字符串，则不进行后续操作
-        if not vtOrderID:
-            return
+        quota = self.prepare_account(account)
+        if not quota:
+            return False
 
-        if STOPORDERPREFIX in vtOrderID:
-            self.ctaEngine.cancelStopOrder(vtOrderID)
-        else:
-            self.ctaEngine.cancelOrder(vtOrderID)
+        return quota.trade_proxy.cancelOrder(order_id)
+
+        # 如果发单号为空字符串，则不进行后续操作
+        # if not vtOrderID:
+        #     return
+        #
+        # if STOPORDERPREFIX in vtOrderID:
+        #     self.ctaEngine.cancelStopOrder(vtOrderID)
+        # else:
+        #     self.ctaEngine.cancelOrder(vtOrderID)
 
         # ----------------------------------------------------------------------
 
+    def getOrder(self,order_id,account=''):
+        quota = self.prepare_account(account)
+        if not quota:
+            return None
+        return quota.trade_proxy.getOrder(order_id)
+
+    def getAllOrders(self,account=''):
+        quota = self.prepare_account(account)
+        if not quota:
+            return []
+        return quota.trade_proxy.getAllWorkingOrders()
+
+    def getAllTrades(self,account=''):
+        quota = self.prepare_account(account)
+        if not quota:
+            return False
+        return quota.trade_proxy.getAllTrades()
+
+    def getAllPositions(self,account=''):
+        quota = self.prepare_account(account)
+        if not quota:
+            return False
+        return quota.trade_proxy.getAllPositions()
+
+    def getAllAccounts(self,account=''):
+        quota = self.prepare_account(account)
+        if not quota:
+            return []
+        return quota.trade_proxy.getAllAccounts()
+
     def cancelAll(self):
         """全部撤单"""
-        self.ctaEngine.cancelAll(self.name)
+        # self.ctaEngine.cancelAll(self.name)
+        pass
 
-    def loadTick(self, symbol, days=1, limit=0, product_class=ProductClass.Future):
+    def loadTicks(self, symbol, days=1, limit=0):
         """读取tick数据
         向 DataResService 发起 http 查询请求
         :param symbol: 合约代码
@@ -287,18 +326,17 @@ class FutureHandler(ProductHandler):
         直接连接到mongodb 读取tick数据
         """
         # return DataResServiceProxy().queryTicks(symbol, days, limit, product_class)
-        pass
+        return self.datares_proxy.queryTicks(symbol,days,limit,product_class=ProductClass.Future)
         # ----------------------------------------------------------------------
 
-    def loadBar(self, symbol, scale, days=1, limit=0, product_class=ProductClass.Future):
+    def loadBars(self, symbol, scale, days=1, limit=0):
         """读取bar数据
         :param symbol: 合约代码
         :param scale : bar时间宽度 1m,5m,15m,..
         :param days:  距今天数
         :param limit: 最大的bar数量 , 0: 未限制
         """
-        # return DataResServiceProxy().queryBars(symbol, days, limit, product_class)
-        pass
+        return self.datares_proxy.queryBars(symbol,scale, days, limit, product_class=ProductClass.Future)
 
 
 class StockHandler(ProductHandler):

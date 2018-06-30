@@ -15,6 +15,9 @@ def start(ctx):
     symbols = ctx.configs.get('sub_ticks','').split(',')
     ctx.future.subTicks(symbols[0])
     # ctx.future.subBars(symbols[0],'5m')
+    print ctx.future.accounts.keys()    # 配置的期货账户
+    print ctx.mongodb
+    quota = ctx.future.getAllAccounts()
 
 
 def stop(ctx):
@@ -30,7 +33,17 @@ def onTick(tick,ctx):
     print 'tick.data', tick.data
 
 def onTrade(trade,ctx):
+    """
+
+    :param trade:
+    :param ctx:
+    :return:
+    """
     print 'strategy: onTrade()..'
+
+def onOrder(order,ctx):
+    print 'order:',order.product,order.account
+
 
 def onBar(bar,ctx):
     """

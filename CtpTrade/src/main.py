@@ -49,6 +49,7 @@ class TradeAdapter(TradeService, TradeFrontServiceTraits):
         self.account = ''
 
         self.down_counter = 0  # 继续运行标志
+        self.gatewayName = ''
 
     def init(self, cfgs, **kwargs):
         self.parseOptions()
@@ -148,19 +149,19 @@ class TradeAdapter(TradeService, TradeFrontServiceTraits):
         self.dataEngine = DataEngine(self.ee,self)
         self.mainEngine = MainEngine(self.ee,self.dataEngine)  # 忽略掉 默认的 DataEngine
 
-        gatewayName = ''
+        self.gatewayName = ''
         if self.product == ProductClass.Future:
             self.mainEngine.addGateway(ctpGateway)
-            gatewayName = ctpGateway.gatewayName
+            self.gatewayName = ctpGateway.gatewayName
 
         if self.product == ProductClass.Stock:
             self.mainEngine.addGateway(xtpGateway)
-            gatewayName = xtpGateway.gatewayName
+            self.gatewayName = xtpGateway.gatewayName
 
         le.info(u'主引擎创建成功')
         le.info(u'注册日志事件监听')
         self.registerEvent()
-        self.mainEngine.connect(gatewayName, cfgs)
+        self.mainEngine.connect(self.gatewayName, cfgs)
 
         le.info(u'连接CTP接口')
 
@@ -191,19 +192,17 @@ class TradeAdapter(TradeService, TradeFrontServiceTraits):
         self.ee.register(EVENT_LOG, self.processLogEvent)
         self.ee.register(EVENT_ERROR, self.processErrorEvent)
 
-    def publishMessage(self,data):
-        """
-        通过pub通道将消息发布给策略runner
-        :param data:  VtTradeData and VtOrderData
-        :return:
-        """
-        message = None
-        channel = self.channels.get('pub') #
-        if isinstance(data,VtTradeData):
-            message = Message(command.OnTradeData.NAME)
-        if isinstance(data,command.OnOrderData.NAME):
-            message = Message(command.OnOrderData.NAME)
+    def serviceStatusAndConfigs(self):
+        """配置本地服务的运行参数和状态"""
+        cfgs = TradeService.serviceStatusAndConfigs()
+        service = instance.serviceManager.get('http')
+        if service:
+            http = service.cfgs.get('http', {})
+            url = 'http://{host}:{port}/{path}'.format(
+                    host=http.get('host'),
+                    port=http.get('port'),
+                    path=http.get('path')
+            )
+            cfgs.http = url
 
-        if message:
-            message.data = data.__dict__
-            Request(channel).send(message)
+        return cfgs

@@ -275,20 +275,20 @@ class FlaskService( ServiceBase):
         """
         from mantis.fundamental.utils.network import select_address_port
         http = self.cfgs.get('http')
-        start = 18900
-        end = 18950
-        address = select_address_port(http.get('host'),start,end)
-        self.cfgs.get('http')['port'] = address[1]
+
+        if not http.get('port'): # port 未定义或者为0
+            start = 18900
+            end = 18950
+            address = select_address_port(http.get('host'),start,end)
+            self.cfgs.get('http')['port'] = address[1]
 
     def start(self, block=True):
         self.select_address()
-        self.thread = Thread(target= self.runThread)
-        self.thread.start()
 
         http = self.getConfig().get('http')
         host = http.get('host','127.0.0.1')
         port = http.get('port',5000)
-        app = self.app
+        # app = self.app
 
         # if http.get('debug', False):
         #     app.run(host,port,debug=True)
@@ -302,21 +302,25 @@ class FlaskService( ServiceBase):
 
 
 
-        # if platform.system() == 'Windows':
-        #     self.server = make_server(host,port,app)
-        # else:
-        #     self.server = pywsgi.WSGIServer((host,port),app)
-        #     self.server.start()
+        self.initHttpServer()
+
         if block:
             self.logger.info('Service: %s started, Listen on %s:%s ...' % (self.name, host, port))
             self.server.serve_forever()
+        else:
+            self.thread = Thread(target=self.runThread)
+            self.thread.setDaemon(True)
+            self.thread.start()
 
-    def runThread(self):
+
+    def initHttpServer(self):
         http = self.getConfig().get('http')
         host = http.get('host', '127.0.0.1')
         port = http.get('port', 5000)
         app = self.app
         from mantis.fundamental.application.use_gevent import USE_GEVENT
+
+        print '--' * 20
         if USE_GEVENT:
             from gevent import pywsgi
             self.server = pywsgi.WSGIServer((host, port), app)
@@ -325,13 +329,9 @@ class FlaskService( ServiceBase):
             from wsgiref.simple_server import make_server
             self.server = make_server(host, port, app)
 
-        # if platform.system() == 'Windows':
-        #     self.server = make_server(host, port, app)
-        # else:
-        #     self.server = pywsgi.WSGIServer((host, port), app)
-        #     self.server.start()
-
         self.logger.info('Service: %s started, Listen on %s:%s ...' % (self.name, host, port))
+
+    def runThread(self):
         # print 'xxxx-Service: %s started, Listen on %s:%s ...' % (self.name, host, port)
         self.server.serve_forever()
 

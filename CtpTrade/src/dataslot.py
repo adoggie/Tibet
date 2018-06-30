@@ -63,6 +63,9 @@ class DataEngine(object):
     # ----------------------------------------------------------------------
     def processOrderEvent(self, event):
         """处理委托事件"""
+        from mantis.trade.command import OnOrderData
+        from mantis.trade.message import Message
+
         order = event.dict_['data']
         self.orderDict[order.vtOrderID] = order
 
@@ -78,11 +81,14 @@ class DataEngine(object):
         detail = self.getPositionDetail(order.vtSymbol)
         detail.updateOrder(order)
 
-        self.service.publishMessage(order)
+        msg = Message(OnOrderData.NAME,data=order.__dict__)
+        self.service.publishMessage(msg)
         # ----------------------------------------------------------------------
 
     def processTradeEvent(self, event):
         """处理成交事件"""
+        from mantis.trade.command import OnTradeData
+        from mantis.trade.message import Message
         trade = event.dict_['data']
 
         self.tradeDict[trade.vtTradeID] = trade
@@ -91,7 +97,8 @@ class DataEngine(object):
         detail = self.getPositionDetail(trade.vtSymbol)
         detail.updateTrade(trade)
 
-        self.service.publishMessage(trade)
+        msg = Message(OnTradeData.NAME,data = trade.__dict__)
+        self.service.publishMessage(msg)
         # ----------------------------------------------------------------------
 
     def processPositionEvent(self, event):
@@ -245,6 +252,44 @@ class DataEngine(object):
         """获取错误"""
         return self.errorList
 
+    def sendOrder(self,order_req):
+        mainEngine = self.service.mainEngine
+        reqList = mainEngine.convertOrderReq(order_req)
+        vtOrderIDList = []
+
+        if not reqList:
+            return vtOrderIDList
+
+        for convertedReq in reqList:
+            vtOrderID = mainEngine.sendOrder(convertedReq, self.service.gatewayName)  # 发单
+            # self.orderStrategyDict[vtOrderID] = strategy  # 保存vtOrderID和策略的映射关系
+            # self.strategyOrderDict[strategy.name].add(vtOrderID)  # 添加到策略委托号集合中
+            vtOrderIDList.append(vtOrderID)
+
+        # self.writeCtaLog(u'策略%s发送委托，%s，%s，%s@%s'
+        #                  % (strategy.name, vtSymbol, req.direction, volume, price))
+
+        return vtOrderIDList
+
+    def cancelOrder(self,vtOrderID):
+        """撤销订单"""
+        mainEngine = self.service.mainEngine
+        order = mainEngine.getOrder(vtOrderID)
+
+        # 如果查询成功
+        if order:
+            # 检查是否报单还有效，只有有效时才发出撤单指令
+            orderFinished = (order.status == STATUS_ALLTRADED or order.status == STATUS_CANCELLED)
+            if not orderFinished:
+                req = VtCancelOrderReq()
+                req.symbol = order.symbol
+                req.exchange = order.exchange
+                req.frontID = order.frontID
+                req.sessionID = order.sessionID
+                req.orderID = order.orderID
+                mainEngine.cancelOrder(req, order.gatewayName)
+        else:
+            self.service.logger.error('no order  matched:'+ vtOrderID)
 
 class PositionDetail(object):
     """本地维护的持仓信息"""

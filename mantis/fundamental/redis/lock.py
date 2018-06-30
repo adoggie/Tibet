@@ -24,5 +24,14 @@ class Locker(object):
         self.dlm.unlock(self.r)
 
 
-
-
+# import time
+# lock = redlock.RedLock("distributed_lock",
+#               connection_details=[
+#                 {'host':'172.16.109.1','port':6379,'db':0}
+#
+#               ])
+#
+# lock.acquire()
+# print 'enter lock...'
+# time.sleep(10000)
+# lock.release()

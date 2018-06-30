@@ -4,19 +4,25 @@ from mantis.fundamental.application.app import instance
 from mantis.fundamental.utils.useful import singleton
 from mantis.trade.types import TimeDuration,ProductClass
 from mantis.trade.errors import ErrorDefs
-import grequests
+import requests
 from mantis.trade import command
 from mantis.trade.message import  *
 
 
-@singleton
+# @singleton
 class DataResServiceProxy(object):
     """
     数据资源访问服务
     查询历史行情数据(Tick/Bar)
     """
-    def __init__(self):
-        pass
+    def __init__(self,handler,http):
+        """
+
+        :param handler:  handler.ProductHandler
+        :param http:
+        """
+        self.http = http
+        self.handler = handler
 
     def queryBars(self,symbol,scale,days,limit=0,product_class=ProductClass.Future):
         """
@@ -62,45 +68,81 @@ class TradeAdapterProxy(object):
         """
         self.http = http
 
+    def request(self,dataCLS,data,error_data=None):
+        """
+
+        :param dataCLS:
+        :param data:
+        :param error_data:
+        :return:
+        """
+
+        msg = Message(dataCLS.NAME,data=data.__dict__)
+        try:
+            resp = requests.post(self.http, data=msg.marshall(), timeout=2)
+            result = dataCLS.Result().assign(resp.json())
+            # 传入对象为 CallReturn().json()
+            # { status:0,errcode,errmsg,result:{} ]
+
+        except:
+            traceback.print_exc()
+            return error_data
+        return result.value
+
     def getOrder(self,order_id):
         """查询委托"""
         data = command.GetOrder()
         data.order_id = order_id
-        msg = Message(command.GetOrder.NAME,data=data.__dict__)
-        try:
-            resp = grequests.post(self.http,data = msg.marshall())
-            result = command.GetOrder.Result()
-            result.assign(resp.json)
-            return result.order
-        except:
-            traceback.print_exc()
-        return None
+        result = self.request(command.GetOrder,data)
+        return result
 
     def getAllWorkingOrders(self):
         """查询所有活动委托（返回列表）"""
-        pass
+        data = command.GetAllWorkingOrders()
+        result = self.request(command.GetAllWorkingOrders, data,[])
+        return result
 
     def getAllTrades(self):
         """获取所有成交"""
-        return self.tradeDict.values()
+        data = command.GetAllTrades()
+        result = self.request(command.GetAllTrades, data, [])
+        return result
 
     # ----------------------------------------------------------------------
     def getAllPositions(self):
         """获取所有持仓"""
-        return self.positionDict.values()
+        data = command.GetAllPositions()
+        result = self.request(command.GetAllPositions, data, [])
+        return result
 
     # ----------------------------------------------------------------------
     def getAllAccounts(self):
         """获取所有资金"""
-        # return self.accountDict.values()
-        pass
+        data = command.GetAllAccounts()
+        result = self.request(command.GetAllAccounts, data, [])
+        return result
     # ----------------------------------------------------------------------
     def getPositionDetail(self, vtSymbol):
-        pass
+        return None
 
     def getAllPositionDetails(self):
         """查询所有本地持仓缓存细节"""
-        return self.detailDict.values()
+        return []
 
     def sendOrder(self,order_req,strategy_id):
-        pass
+        """
+
+        :param order_req: VtOrderReq
+        :param strategy_id:
+        :return:
+        """
+        data = command.SendOrder()
+        data.__dict__ = order_req.__dict__
+        orderIds = self.request(command.SendOrder,data,[])
+        return orderIds
+
+    def cancelOrder(self,order_id):
+        data = command.CancelOrder()
+        data.order_id = order_id
+        result = self.request(command.CancelOrder,data,False)
+        return result

@@ -30,6 +30,8 @@ logging:
     - type: console
       enable: false
 
+
+
 http_trace: #自动日志记录
   level: DEBUG
   request:
@@ -118,7 +120,7 @@ services:
     http:
 #      host : '172.16.109.237'
       host : '127.0.0.1'
-      port : 18901
+      port : 18801
       threaded: false
       debug: true
 
@@ -162,6 +164,9 @@ services:
 
     ctp_tick_filters:
       - 'filters.CtpTickValidator'
+    running_unique: True  #仅仅允许单独进程运行
+    datares_service:
+      http: 'http://172.16.109.1:18802/v1'
 
 
 

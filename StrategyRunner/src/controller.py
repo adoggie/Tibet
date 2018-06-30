@@ -4,7 +4,7 @@ import os,os.path
 import inspect
 import yaml
 import json
-from mantis.trade.types import TimeDuration,BarData,TickData,ProductClass
+from mantis.trade.types import TimeDuration,ProductClass
 from mantis.fundamental.application.app import instance
 from mantis.trade.strategy import StrategyTask
 from context import Context
@@ -80,6 +80,7 @@ class StrategyController(object):
         self.ctx.quotas  = self.task.quotas
         self.ctx.future  = self.futureHandler
         self.ctx.stock   = self.stockHandler
+        self.ctx.mangodb = instance.datasourceManager.get('mongodb').conn
 
         self.initQuotas()
         self.futureHandler.open()
@@ -145,12 +146,12 @@ class StrategyController(object):
     def onTimer(self,timer_id):
         self.table.invoke('ontimer',timer_id,self.ctx)
 
-    def onStopOrder(self,order):
-        self.table.invoke('onstoporder',order,self.ctx)
+    # def onStopOrder(self,order):
+    #     self.table.invoke('onstoporder',order,self.ctx)
 
-    def setDefaultAccount(self,name):
-        """设置缺省的资金账户"""
-        self.defaultAccount = name
+    # def setDefaultAccount(self,name):
+    #     """设置缺省的资金账户"""
+    #     self.defaultAccount = name
     #=================================================
 
 if __name__ == '__main__':

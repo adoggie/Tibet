@@ -58,18 +58,6 @@ class TradeAccount(object):
         self.comment = ''
         self.connect = {}       # 连接配置信息，不同接入方式参数不同
 
-        # self.product_class = ''     # 产品类型 :  期货/股票
-        # self.exchange = ''
-        # self.gateway = ''           # 交易接入系统名称 CTP
-        # self.broker = ''            # 经纪公司
-        # self.user = ''
-        # self.password = ''
-        # self.market_server_addr = ''
-        # self.trade_server_addr = ''
-        #
-        # self.auth_code = ''
-        # self.user_product_info = ''
-
     def loads(self,cfgs):
         object_assign(self,cfgs)
 
@@ -77,6 +65,7 @@ class TradeAccount(object):
         return hash_object(self)
 
 class TradeAccountQuota(object):
+    """交易资金账户配额"""
     EMPTY_LIST = {}
     def __init__(self):
         self.name = ''
@@ -84,7 +73,7 @@ class TradeAccountQuota(object):
         self.limit = 10000
         self.product = ProductClass.Undefined
         self.props = {}
-        self.channels = {}  # 交互通道
+        self.channels = {}       # 交互通道
         self.trade_proxy = None # 交易代理对象
 
     def dumps(self):
