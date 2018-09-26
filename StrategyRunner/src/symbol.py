@@ -75,6 +75,8 @@ class SymbolTable(object):
         self.symbols['onorder'] = SymbolMatched(['onorder','on_order'],1,1)  #
         self.symbols['ontrade'] = SymbolMatched(['ontrade','on_trade'],1,1)  #
         self.symbols['ontimer'] = SymbolMatched(['ontimer','on_timer'],1,1)  #
+        self.symbols['onaccount'] = SymbolMatched(['onaccount','on_account'],1,1)  #
+        self.symbols['onposition'] = SymbolMatched(['onposition','on_position'],1,1)  #
 
 
     def loadModule(self,module_name):

@@ -17,4 +17,7 @@ EVENT_ORDER = 'eOrder.'                 # 报单回报事件
 EVENT_POSITION = 'ePosition.'           # 持仓回报事件
 EVENT_ACCOUNT = 'eAccount.'             # 账户回报事件
 EVENT_CONTRACT = 'eContract.'           # 合约基础信息回报事件
+# EVENT_CONTRACT_COMMISSION = 'eContractCommission.'           # 合约手续费率信息回报事件
 EVENT_ERROR = 'eError.'                 # 错误回报事件
+# EVENT_DEPTH_MARKET_DATA = 'eDepthMarketData.'
+EVENT_DATA = 'eData.'

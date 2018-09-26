@@ -18,7 +18,9 @@ class TestServer(RpcServer):
 
     #----------------------------------------------------------------------
     def add(self, a, b):
-        """测试函数"""
+        """测试函数
+        :rtype: 
+        """
         print 'receiving: %s, %s' % (a,b)
         return a + b
 

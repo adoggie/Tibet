@@ -74,13 +74,18 @@ class StrategyController(object):
         task = StrategyTask()
         task.loads(cfgs)
         self.task = task
-        self.ctx.logger = instance.getLogger()
+
+        # 配置文件中的策略id设置为当前服务id
+        # self.service.setServiceId( task.strategy.id ) # 2018.9.10
+
+        # self.ctx.logger = instance.getLogger()
+        self.ctx.logger = self.service.strategy_logger # 定向输出策略日志到 redis的分发队列
 
         self.ctx.configs = self.task.strategy.configs
         self.ctx.quotas  = self.task.quotas
         self.ctx.future  = self.futureHandler
         self.ctx.stock   = self.stockHandler
-        self.ctx.mangodb = instance.datasourceManager.get('mongodb').conn
+        self.ctx.mongodb = instance.datasourceManager.get('mongodb').conn
 
         self.initQuotas()
         self.futureHandler.open()
@@ -105,9 +110,13 @@ class StrategyController(object):
             self.startTradeAdapter(quota.account,quota.product)
 
     def startTradeAdapter(self,account,product):
-
+        """通知账户交易服务加载器启动TradeAdapter"""
         msg = Message(name= command.StartTradeAdapter.NAME)
         msg.data = dict( product = product,account = account)
+
+        # service_id = TradeAdapterServiceIdFormat.format(product=product,account=account)
+
+        # ServiceCommandChannelAddressSub.format(product = product,account=)
         channel = self.service.channels.get('trade_adapter_launcher')
         Request(channel).send(msg.marshall())
 
@@ -146,6 +155,12 @@ class StrategyController(object):
     def onTimer(self,timer_id):
         self.table.invoke('ontimer',timer_id,self.ctx)
 
+    def onPosition(self,position):
+        self.table.invoke('onposition',position,self.ctx)
+
+    def onAccount(self,account):
+        self.table.invoke('onaccount',account,self.ctx)
+
     # def onStopOrder(self,order):
     #     self.table.invoke('onstoporder',order,self.ctx)
 
@@ -153,6 +168,12 @@ class StrategyController(object):
     #     """设置缺省的资金账户"""
     #     self.defaultAccount = name
     #=================================================
+
+    def cancelAllOrders(self, account=''):
+        """一建撤销所有资金账户下的委托单"""
+        handlers = [self.futureHandler,self.stockHandler]
+        for handler in handlers:
+            handler.cancelAllOrders()
 
 if __name__ == '__main__':
     StrategyController(None).loadStrategy('strategy_example')

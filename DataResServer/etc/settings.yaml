@@ -57,7 +57,7 @@ http_trace: #自动日志记录
 datasources:
   - name: 'mongodb'
     class: 'mantis.fundamental.nosql.mongo.Datasource'
-    host: '172.16.109.1'
+    host: 'mongodb'
     port: 27017
     dbname:
     user:
@@ -72,7 +72,7 @@ datasources:
 
   - name: 'redis'
     class: 'mantis.fundamental.redis.datasource.Datasource'
-    host: '172.16.109.1'
+    host: 'redis'
     port: 6379
     password: ''
     db: 0
@@ -93,7 +93,7 @@ message_brokers:
 
   - name: 'redis'
     class: 'mantis.fundamental.redis.broker.MessageBroker'
-    host: '172.16.109.1'
+    host: 'redis'
     port: 6379
     password: ''
     db: 0
@@ -127,7 +127,7 @@ services:
     http:
 #      host : '172.16.109.237'
       host : '127.0.0.1'
-      port : 18802
+      port : 18803
       threaded: false
       debug: true
 

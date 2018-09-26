@@ -17,7 +17,7 @@ def __FILE__():
 class Logger:
     def __init__(self,name):
         self.name = name
-        self.logger = logging.getLogger(name)
+        self.logger = logging.getLogger()
         self.fmt_extra = {}
         self.fmt = ''
         self.message_fmt = '' # '%(project_name)s:%(project_version)s %(app_id)s %(_filename)s:%(_lineno)d [%(tags)s] %(message)s'
@@ -42,26 +42,24 @@ class Logger:
         return intval
 
     def addHandler(self,handler):
+        handler.setFormatter(self.fmt)
         self.logger.addHandler(handler)
-        handler.setLogger(self)
+        # handler.setLogger(self)
         # handler.setLevel(self.level)
 
     TEMPLATE_FORMAT = '[%(project_name)s:%(project_version)s %(app_id)s] %(levelname)s %(asctime)s %(filename)s:%(lineno)d [%(tags)s] %(message)s'
 
-    def setFormat(self,fmt = TEMPLATE_FORMAT):
-        # from logging import config
-
-        logging.basicConfig(format= fmt )
-        # logging.basicConfig()
+    def setFormat(self,fmt):
         self.fmt = fmt
+        # self.logger
         return self
 
-    def setMessageFormat(self,fmt):
-        self.message_fmt = fmt
-
-    def setFormatExtra(self,extra):
-        self.fmt_extra = extra
-        return self
+    # def setMessageFormat(self,fmt):
+    #     self.message_fmt = fmt
+    #
+    # def setFormatExtra(self,extra):
+    #     self.fmt_extra = extra
+    #     return self
 
 
     def setTags(self,tags):
@@ -113,40 +111,34 @@ class Logger:
 
     def _log(self,level,*args,**kwargs):
         """
-
-        :param level:
-        :param args:
-        :param kwargs:
-            tags - list ['HOP','TRANS:A10021']
-                - string 'HOP,TRANS:A10021'
-        :return:
         """
         # todo. logging bug need for fixing
+        self.logger.log(level,args[0])
         # self.logger.log(level,args[0],*args[1:])
-        print level,args[0]%args[1:]
-        return
-
-        if type(level) in (str,unicode):
-            level = Logger.convertLevelToIntValue(level)
-        extra = self.fmt_extra.copy()
-
-        # if kwargs.has_key('tags'):
-        #     extra['tags'] = self._normalize_tags( kwargs['tags'])
+        # print level,args[0]%args[1:]
+        # return
+        #
+        # if type(level) in (str,unicode):
+        #     level = Logger.convertLevelToIntValue(level)
+        # extra = self.fmt_extra.copy()
+        #
+        # # if kwargs.has_key('tags'):
+        # #     extra['tags'] = self._normalize_tags( kwargs['tags'])
+        # # else:
+        # #     extra['tags'] = self._normalize_tags('')
+        #
+        # extra['tags'] = ''
+        #
+        # filename,lineno = __FILE__()
+        #
+        # extra['_filename'] = os.path.basename(filename)
+        # extra['_lineno'] = lineno
+        # message = self.message_fmt%extra
+        #
+        # if len(args)>1:
+        #     self.logger.log( level ,  message + args[0]%args[1:] )
         # else:
-        #     extra['tags'] = self._normalize_tags('')
-
-        extra['tags'] = ''
-
-        filename,lineno = __FILE__()
-
-        extra['_filename'] = os.path.basename(filename)
-        extra['_lineno'] = lineno
-        message = self.message_fmt%extra
-
-        if len(args)>1:
-            self.logger.log( level ,  message + args[0]%args[1:] )
-        else:
-            self.logger.log( level ,  message + args[0] )
+        #     self.logger.log( level ,  message + args[0] )
 
 
     def debug(self,*args,**kwargs):

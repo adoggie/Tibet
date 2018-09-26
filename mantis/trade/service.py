@@ -3,7 +3,7 @@
 import time
 import os
 import string
-from threading import Thread
+from threading import Thread,Timer
 from mantis.fundamental.application.app import instance
 from mantis.fundamental.service import ServiceBase
 from mantis.fundamental.basetype import ValueEntry
@@ -24,9 +24,10 @@ class TimedTask(object):
         self.user = user_data
         self.times = 0
 
-
     def start(self):
         self.start_time = time.time()
+        self.timer = Timer(self.timeout, self.action, (self,))
+        self.timer.start()
 
     def stop(self):
         self.start_time = 0
@@ -163,8 +164,8 @@ class TradeService(ServiceBase):
             str(ServiceCommonProperty.Status): ServiceRunStatus.RUNNING,
             str(ServiceCommonProperty.PID): pid
         }
-        self.table.updateServiceConfigValues(self.getServiceId(), self.getServiceType(),**dict_)
 
+        self.table.updateServiceConfigValues(self.getServiceId(), self.getServiceType(),**dict_)
         self.syncDownServiceConfig()
         # self.initCommandChannels()
 
@@ -236,11 +237,11 @@ class TradeService(ServiceBase):
         self.log_url = cfgs.get(ServiceCommonProperty.LogUrl,'')
         self.cfgs_remote = cfgs
 
-    def start(self):
+    def start(self,block=False):
         self.initCommandChannels()
         self.registerTimedTask(self.updateLiveStatus,self)
-        self._thread = Thread(target=self._run)
-        self._thread.start()
+        # self._thread = Thread(target=self._run)
+        # self._thread.start()
 
     def stop(self):
         self.isclosed = True
@@ -284,6 +285,8 @@ class TradeService(ServiceBase):
                                              )
         self.broadcastServiceStatus()
 
+        task.start()
+
     def runningAsUniqueProcess(self):
         """保持运行唯一进程"""
         if not self.cfgs.get('running_unique',False):
@@ -300,6 +303,8 @@ class TradeService(ServiceBase):
         """保持进程锁"""
         result= self.process_lock.lock()
         # print 'Process Unique Lock:',result
+        task.start()
+
 
     def tryAcquireProccessLock(self):
         from mantis.fundamental.redis.lock import Locker
@@ -307,7 +312,7 @@ class TradeService(ServiceBase):
         if not self.process_lock:
             cfgs = list_item_match(instance.getConfig().get('datasources',[]),'name','redis')
 
-            resid = self.table.getServiceUniqueName(self.service_type, self.service_id)+'.lock'
+            resid = TradeAvailableServiceLockFormat.format(str(self.service_type), self.service_id)
             servers = [dict(host=cfgs.get('host'), port=cfgs.get('port'), db=cfgs.get('db', 0))
                        ]
             self.process_lock = Locker(resid, ttl=TimeDuration.SECOND*5*1000,servers=servers)
@@ -316,8 +321,9 @@ class TradeService(ServiceBase):
 
     def broadcastServiceStatus(self):
         """在pub通道上广播自身服务的状态配置信息"""
-        msg = self.serviceStatusAndConfigs()
-        self.publishMessage(msg)
+        data = self.serviceStatusAndConfigs()
+        message = Message(command.ServiceStatusBroadcast.NAME,data = data.__dict__)
+        self.publishMessage(message)
 
     def serviceStatusAndConfigs(self):
         msg = command.ServiceStatusBroadcast()

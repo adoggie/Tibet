@@ -5,7 +5,7 @@ __pycache__/
 *.con
 
 # C extensions
-#*.so
+*.so
 *.pid
 *.log
 # Distribution / packaging

@@ -18,8 +18,11 @@ def get_symbol_ticks(message,ctx):
     tickobj.__dict__ = tick
 
     main = instance.serviceManager.get('main')
-    if symbol == 'AP810':
-        main.onTick(symbol,tickobj)
+    # debug = main.cfgs.get('debug',{})
+    # if debug.get('enable',False) and symbol in debug.get('symbols',[]):
+    #     main.onTick(symbol,tickobj)
+    # else:
+    main.onTick(symbol,tickobj)
 
     """
     貌似凭借多年经验感觉错误在于 redis的接收线程读取数据之后，处理数据，并再将数据发送回redis，期间在一个线程中执行导致的故障 

@@ -21,6 +21,7 @@ from controller import StrategyController
 from optparse import OptionParser
 from command import create,list,upload,pull,remove,run_local_name,run_server_strategy_id
 from mantis.trade.constants import *
+from mantis.trade.log import StrategyLogHandler
 
 class StrategyRunner(TradeService):
     def __init__(self,name):
@@ -30,6 +31,9 @@ class StrategyRunner(TradeService):
         # self.queue = Queue()  # 队列
         # self.thread = Thread(target=self.threadDataFanout)  # 线程
         self.logger = instance.getLogger()
+        self.strategy_logger = None
+
+
         # self.symbols = {} # 已经订阅的合约
         self.controller = None
         self.runmode = StrategyRunMode.Null
@@ -109,6 +113,16 @@ class StrategyRunner(TradeService):
                 self.runmode = StrategyRunMode.Product  #
                 # run_server_strategy_id(strategy_name,self)
 
+    @property
+    def strategy_name(self):
+        # 策略名称 默认为: 'S' + 策略模块名 ， 例如: 'SDemo'
+        return self.service_id
+
+    strategy_id = strategy_name
+
+    def setServiceId(self,sid):
+        self.service_id = sid
+
     def syncDownServiceConfig(self):
         TradeService.syncDownServiceConfig(self)
 
@@ -118,7 +132,11 @@ class StrategyRunner(TradeService):
         handler = TradeServiceLogHandler(self)
         self.logger.addHandler(handler)
 
+        self.strategy_logger = StrategyLogHandler(self.strategy_name, self,default_logger=self.logger)
+
     def start(self,block=True):
+        TradeService.start(self)
+
         self.controller = StrategyController(self)
         self.setupFanoutAndLogHandler()
         if self.runmode == StrategyRunMode.Product:
@@ -127,7 +145,6 @@ class StrategyRunner(TradeService):
             run_local_name(self.service_id,DevelopUserStrategyKeyPrefix,self)
 
         # 创建日志引擎
-        TradeService.start(self)
 
 
     def stop(self):

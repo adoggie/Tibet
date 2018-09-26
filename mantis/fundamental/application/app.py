@@ -42,7 +42,7 @@ class Application(Singleton,object):
     def setProps(self,**kwargs):
         self.props.update(kwargs)
 
-    def getProp(self,name,default_):
+    def getProp(self,name,default_=None):
         return self.props.get(name,default_)
 
     @property
@@ -105,6 +105,12 @@ class Application(Singleton,object):
         name = "%s.%s-%s" % (self.projectName, self.name, os.getpid())
         return name
 
+    def setName(self,name):
+        self.name = name
+        return self
+
+    def getName(self):
+        return self.name
 
     @property
     def projectName(self):
@@ -194,6 +200,7 @@ class Application(Singleton,object):
         mkpath(self.getDataPath())
         mkpath(self.getLogPath())
         mkpath(self.getRunPath())
+        mkpath(self.getTempPath())
 
 
     def initServices(self):
@@ -229,7 +236,8 @@ class Application(Singleton,object):
         """
 
         pid = os.getpid()
-        filename = os.path.join(self.getRunPath(),'server_{}.pid'.format(timestamp_to_str( timestamp_current())))
+        # filename = os.path.join(self.getRunPath(),'server_{}.pid'.format(timestamp_to_str( timestamp_current())))
+        filename = os.path.join(self.getRunPath(),'server.pid')
         fp = open(filename,'w')
         fp.write('%s'%pid)
         fp.close()
@@ -252,41 +260,36 @@ class Application(Singleton,object):
     def initLogs(self):
         import logging,string
 
-        ver = self.conf.get('project_version')
-        project = self.conf.get('project_name')
-        app_id = self.appName
+        # ver = self.conf.get('project_version')
+        # project = self.conf.get('project_name')
+        # app_id = self.appName
         self.logger = self.initLogger()
 
         log = self.conf.get('logging')
         level = log.get('level','INFO')
         self.logger.setLevel(level) # 不能设置全局，否则会默认输出到console
 
-        extra = {'project_name':project,'project_version':ver,'app_id':app_id,'tags':''}
+        # extra = {'project_name':project,'project_version':ver,'app_id':app_id,'tags':''}
         formatter = logging.Formatter(log.get('format'))
-        self.logger.setFormat(log.get('format')).setFormatExtra(extra)
-
-        self.logger.setMessageFormat(log.get('message_format'))
-
-        self.initLogHandlerFilters(log.get('filters',{}))
+        self.logger.setFormat(formatter)
+        # self.logger.setMessageFormat(log.get('message_format'))
+        # self.initLogHandlerFilters(log.get('filters',{}))
 
         handlers = log.get('handlers',[])
         for cfg in handlers:
             handler = self.initLogHandler(cfg)
             if handler:
-                handler.setFormatter(formatter)
+                # handler.setFormatter(formatter)
                 self.logger.addHandler(handler)
-
-
-                ss = cfg.get('filter', '').strip()
-                if ss:
-                    ss = map( string.strip ,ss.split(',') )
-
-                    for s in ss:
-                        flt = self.log_filters.get(s)
-                        if flt:
-                            handler.addFilter(flt)
-                        else:
-                            print 'error: filter<%s> not found!'%s
+                # ss = cfg.get('filter', '').strip()
+                # if ss:
+                #     ss = map( string.strip ,ss.split(',') )
+                #     for s in ss:
+                #         flt = self.log_filters.get(s)
+                #         if flt:
+                #             handler.addFilter(flt)
+                #         else:
+                #             print 'error: filter<%s> not found!'%s
 
 
     def initLogHandlerFilters(self,cfgs):

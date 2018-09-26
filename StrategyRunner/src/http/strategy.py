@@ -12,21 +12,53 @@ http控制接口，提供策略下发、运行监控、停止等
 
 """
 
-def stop():
-    """
-    停止策略运行
-    dispatcher发起停止时，先通知runner停止当前策略，同时通知launcher将runner进程kill
-    """
-    symbols = request.get_json()
-    service = instance.serviceManager.get('main')
-    service.subscribe(symbols)
-    return CR().response
+def get_strategy_running_profile():
+    """获取策略所有运行状态信息"""
+    main = instance.serviceManager.get('main')
+    controller = main.controller
 
-def status():
-    """
-    运行状态查询接口，监控程序访问此接口获知runner运行是否正常
-    :return:
-    """
-    pass
+    profiles = {
+        "service_id": main.service_id,
+        "service_type": str(main.service_type),
+        "futures": {
+            "accounts": [
+                {}
+            ]
+        }
+    }
 
+    accounts = []
+    for q in controller.futureHandler.accounts.values():
+        item = {
+            "account": q.account,
+            "product": q.product,
+            "name": q.name,
+            "limit": q.limit,
+            "proxy": None,  # q.trade_proxy,
+            "data": ''  # trade_query(q.trade_proxy)
+        }
+        if q.trade_proxy:
+            item['data'] = trade_query(q.trade_proxy)
+            item['proxy_http'] = q.trade_proxy.http
+        accounts.append(item)
 
+    profiles['futures']['accounts'] = accounts
+    return profiles
+
+def trade_query(proxy):
+    result ={}
+
+    result['currentaccount'] = proxy.getCurrentAccount().__dict__
+
+    result['positions'] = []
+    for pos in proxy.getAllPositions():
+        result['positions'].append( pos.__dict__ )
+
+    result['orders'] = []
+    for order in proxy.getAllWorkingOrders():
+        result['orders'].append( order.__dict__ )
+
+    result['trades'] = []
+    for trade in proxy.getAllTrades():
+        result['trades'].append( trade.__dict__ )
+    return result

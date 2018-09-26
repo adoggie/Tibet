@@ -77,6 +77,7 @@ class MainEngine(object):
             'gatewayType': gatewayModule.gatewayType
         }
         self.gatewayDetailList.append(d)
+        return self.gatewayDict[gatewayName]
         
     #----------------------------------------------------------------------
     def addApp(self, appModule):

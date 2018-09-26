@@ -8,6 +8,9 @@ users:
       - account: 'htqh-02'
         product: 'future'     # 期货、股票
         limit: 200000
+      - account: 'coin-binance-01'
+        product: 'coin'
+        limit: 200000
 
 accounts:                 # 分配的资金账号
   - name:   'htqh-01'
@@ -18,8 +21,12 @@ accounts:                 # 分配的资金账号
     brokerID:   "9999"
     mdAddress:  "tcp://180.168.146.187:10011"  # real time
     tdAddress:  "tcp://180.168.146.187:10001"
+#    userID:     "126005"
     userID:     "113967"
     password:  "loginmm6688"
+
+#    userID:     "125822"
+#    password:  "fire2587587758"
     comments:  "交易服务器地址可以不设置,仅仅使用行情接收功能"
     authCode:   ''
     userProductInfo: ''
@@ -36,3 +43,23 @@ accounts:                 # 分配的资金账号
     comments:  "交易服务器地址可以不设置,仅仅使用行情接收功能"
     authCode:   ''
     userProductInfo: ''
+
+  - name:   'zsqh-01'
+    product: 'future'
+    comment: '浙商期货'
+    gateway: 'CTP'
+    brokerID:   "6010"
+    mdAddress:  "tcp://122.224.243.43:51213"  # real time
+    tdAddress:  "tcp://122.224.243.43:51205"
+    userID:     "61600267"
+    password:  "123456"
+    comments:  "交易服务器地址可以不设置,仅仅使用行情接收功能"
+    authCode:   '12HE020K0KY7FNOX'
+    userProductInfo: 'BQSQuant'
+
+  - name:   'binance-01'
+    product: 'coin'
+    comment: '数字货币'
+    gateway: 'BINANCE'
+    apiKey: ''
+    secretKey: ''

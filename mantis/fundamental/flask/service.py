@@ -73,7 +73,7 @@ class FlaskService( ServiceBase):
             self.app = kwargs.get('app')
         else:
             static_path = os.getcwd()+'/static'
-            template_path = os.getcwd()+'/template'
+            template_path = os.getcwd()+'/templates'
             self.app = Flask(__name__,static_folder=static_path,template_folder=template_path)  # flask会自动将当前代码目录设置为项目根目录 root_path 导致读取templtes , sta它ic 目录失败
 
         Compress(self.app)  # okay
@@ -88,6 +88,23 @@ class FlaskService( ServiceBase):
 
         self.setupRequestHooks()
         self.initBlueprint()
+
+        self.setupTemplates()
+
+    def setupTemplates(self):
+        from werkzeug.routing import BaseConverter
+        from flask import Flask, send_file
+        class RegexConverter(BaseConverter):
+            def __init__(self, map, *args):
+                self.map = map
+                self.regex = args[0]
+
+        self.app.url_map.converters['regex'] = RegexConverter
+
+        @self.app.route('/<regex(".*\.html$"):template_name>')
+        def _template_render(template_name):
+            name = os.path.join(self.app.template_folder, template_name)
+            return send_file(name)
 
 
     def initDatabase(self):
@@ -323,8 +340,12 @@ class FlaskService( ServiceBase):
         print '--' * 20
         if USE_GEVENT:
             from gevent import pywsgi
-            self.server = pywsgi.WSGIServer((host, port), app)
-            self.server.start()
+            from socketio.server import SocketIOServer
+            if http.get('websocket',False):
+                self.server = SocketIOServer((host, port), app, resource="socket.io")
+            else:
+                self.server = pywsgi.WSGIServer((host, port), app)
+                self.server.start()
         else:
             from wsgiref.simple_server import make_server
             self.server = make_server(host, port, app)

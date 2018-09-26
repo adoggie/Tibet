@@ -1,4 +1,4 @@
-#coding:utf-8
+    #coding:utf-8
 
 
 """
@@ -46,6 +46,8 @@ class MessageChannel(object):
 
     def open(self):
         if self.message_handler:
+            if self.thread:
+                return
             if self.cfgs.get('type') == 'pubsub':
                 self.pubsub = self.conn.pubsub()
                 self.pubsub.psubscribe(self.name)

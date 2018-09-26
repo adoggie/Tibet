@@ -22,12 +22,28 @@ TradeAccountNameFormat      = "trade.accounts.{product}.{account}"
 DevelopUserAccountQuotaFormat = "development.users.{user}.quotas.{account}"
 TradeUserAccountQuotaFormat = "trade.users.{user}.quotas.{account}"
 
+TradeAvailableServiceTypeFormat = "trade.available.{}"
+TradeAvailableServiceFullNameFormat = "trade.available.{}.{}"
+TradeAvailableServiceLockFormat = "trade.available.lock.{}.{}"
 
 DevelopUserStrategyKeyPrefix ='development.users.{user}.strategies.{strategy_name}'
 TradeUserStrategyKeyPrefix = 'trade.users.{user}.strategies.{strategy_name}'
 
 CTAContractListKey = 'cta_contract_list'
+XtpContractListKey = 'xtp_contract_list'
+CtpDepthMarketDataListKey = 'ctp_depth_market_data_list'
 
+CTAContractCommissionListKey = 'cta_contract_commission_list'  # 合约手续费定义
+CtpMarketSymbolTickFormat = 'ctp_market_symbol_tick_{symbol}'  # 期货合约的最新市场报价
+XtpMarketSymbolTickFormat = 'xtp_market_symbol_tick_{symbol}'  # 期货合约的最新市场报价
+CoinMarketSymbolTickFormat = 'coin_market_symbol_tick_{symbol}'  # 期货合约的最新市场报价
+
+TradeRequestId_StrategyId_HashFormat = 'trade.request_ids.{product}.{account}' #存放的所有交易账户发生的交易发单序列，用于跟策略关联
+TradeRequestId_Current_Format = 'trade.request_id.current.{product}.{account}' #当前最大发单请求编号
+
+CtpMarket_RequestId_Format = 'trade.ctp.market.request_id.current'
+
+TradeLog_Ctp_DBName = 'TradeLog_Ctp_{account}'
 
 class StrategyRunMode(object):
     Null        = 'null'

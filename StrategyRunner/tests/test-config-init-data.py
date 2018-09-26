@@ -29,9 +29,9 @@ path = './sample.yaml'
 cfgs = yaml.load(open(path).read())
 
 for acc in cfgs.get('accounts'):
-    key = KEYACC_DEV.format(product=acc['product'],name=acc['name'])
+    key = KEYACC_DEV.format(product=acc['product'],account=acc['name'])
     ds.conn.hmset(key,acc)
-    key = KEYACC_PRD.format(product=acc['product'], name=acc['name'])
+    key = KEYACC_PRD.format(product=acc['product'], account=acc['name'])
     ds.conn.hmset(key, acc)
 
 # 写入用户资金配额

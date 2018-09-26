@@ -312,8 +312,13 @@ class EventEngine(object):
     #----------------------------------------------------------------------
     def put(self, event):
         """向事件队列中存入事件"""
+        # if event.type_  not in ('eTimer','eContract.','eLog'):
+        #     print event.type_
+
         self.__queue.put(event)
         # print event,dir(event)
+        # print event.__dict__
+
 
     #----------------------------------------------------------------------
     def registerGeneralHandler(self, handler):

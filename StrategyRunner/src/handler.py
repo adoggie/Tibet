@@ -12,6 +12,9 @@ from vnpy.trader.vtConstant import *
 from vnpy.trader.app.ctaStrategy.ctaBase import *
 from mantis.trade import command
 from proxy import *
+from context import CtpConstantsOrderPriceType
+# from mantis.trade.objects import TradeContractData
+from mantis.trade.utils import get_trade_contract_data
 
 class ProductHandler(object):
     NONE = None
@@ -44,6 +47,8 @@ class FutureHandler(ProductHandler):
         self.default_account = ''
         self.service = controller.service
         self.datares_proxy = None
+        self.contracts = {}         # 合约信息, {symbol:TradeContractData,..}
+        # self.orderid_map_account = {}  # 保存订单编号与资金账号的映射关系
 
     def open(self):
         http = self.service.getConfig().get('datares_service',{}).get('http','')
@@ -53,6 +58,17 @@ class FutureHandler(ProductHandler):
     def close(self):
         for chan in self.chans:
             chan.close()
+
+    def isReady(self):
+        """
+
+        :return:
+        """
+        counter = 0
+        for quota in self.accounts.values():
+            if quota.trade_proxy :
+                counter+=1
+        return counter == len(self.accounts)
 
     def addAccount(self, quota):
         """
@@ -72,12 +88,16 @@ class FutureHandler(ProductHandler):
 
         address_sub = ServiceCommandChannelAddressSub.format(service_id=service_id, service_type=ServiceType.TradeAdapter)
         write = self.service.createServiceCommandChannel(address_sub, open=True)
+        print 'trade adapter address:'
+        print address_pub
+        print address_sub
 
         quota.channels = {'read': read,'write':write}
         self.chans.add(read)
         self.chans.add(write)
 
         self.accounts[quota.account] = quota
+        read.open()
 
         if not self.default_account:
             self.set_default_account(quota.account)  # 设置为默认账号
@@ -90,19 +110,19 @@ class FutureHandler(ProductHandler):
             # 发送保活消息
             msg = Message(command.KeepAlive.NAME)
             Request(channel).send(msg)
-            print 'Send keep alive message to Trade Adapter..\n', msg.marshall()
+            # print 'Send keep alive message to Trade Adapter..\n', msg.marshall()
 
     def handle_message(self, data, ctx):
         """处理从资金接入适配器返回的消息 """
+
+        # self.service.logger.debug('Message Data From Future Channel:' + data )
         channel = ctx['channel']
         quota = channel.props['quota']
         message = Message.unmarshall(data)
         if not message:
             return
 
-        if message.name == command.OnAccountData.NAME:
-            account = VtAccountData()
-            account.__dict__ = message.data
+
 
         if message.name == command.ServiceStatusBroadcast.NAME:
             """TradeAapter上线之后将自身的服务信息广播出来"""
@@ -122,14 +142,40 @@ class FutureHandler(ProductHandler):
             self.controller.onTrade(data)
 
         if message.name == command.OnOrderData.NAME:
+            # 订单事件
             data = command.OnOrderData()
             data.__dict__ = message.data
             data.account = quota.account
             data.product = quota.product
             self.controller.onOrder(data)
 
+        if message.name == command.OnPositionData.NAME:
+            data = command.OnPositionData()
+            data.__dict__ = message.data
+            data.account = quota.account
+            data.product = quota.product
+            self.controller.onPosition(data)
+
+        if message.name == command.OnAccountData.NAME:
+            account = command.OnAccountData()
+            account.__dict__ = message.data
+            account.account = quota.account
+            account.product = quota.product
+            self.controller.onAccount(account)
+
+
     def set_default_account(self, name):
         self.default_account = name
+
+    def sync_contract_data(self,symbol):
+        """ 同步合约信息
+            策略运行如果跨多个交易日则需要定时进行当日的合约信息
+        """
+        data = get_trade_contract_data(symbol)
+        self.contracts[data.symbol] = data
+
+    def get_contract_data(self,symbol):
+        return self.contracts.get(symbol)
 
     def subTicks(self, symbol, gateway='ctp'):
         """
@@ -143,10 +189,13 @@ class FutureHandler(ProductHandler):
         self.chans.add(chan)
         chan.open()
 
+        self.sync_contract_data(symbol)
+
     def handle_tick(self, message, ctx):
+        dict_ = json.loads(message)
         chan = ctx.get('channel')
         data = VtTickData()
-        data.__dict__ = message
+        data.__dict__ = dict_
         data.product = self.type
         self.controller.onTick(data)
 
@@ -170,33 +219,34 @@ class FutureHandler(ProductHandler):
 
 
     def handle_bar(self, message, ctx):
+        dict_ = json.loads(message)
         chan = ctx.get('channel')
         data = VtBarData()
-        data.__dict__ = message
+        data.__dict__ = dict_
         data.scale = chan.props.get('scale')
         data.product = self.type
         self.controller.onBar(data)
 
-    def buy(self, vtSymbol,price, volume, account=''):
+    def buy(self, vtSymbol,price, volume, priceType = CtpConstantsOrderPriceType.PRICETYPE_LIMITPRICE, account=''):
         """买开"""
-        return self.sendOrder(vtSymbol,CTAORDER_BUY, price, volume,account)
+        return self.sendOrder(vtSymbol,CTAORDER_BUY, price, volume,priceType=priceType,account=account)
 
 
-    def sell(self, vtSymbol,price, volume, account=''):
+    def sell(self, vtSymbol,price, volume, priceType = CtpConstantsOrderPriceType.PRICETYPE_LIMITPRICE, account=''):
         """卖平"""
-        return self.sendOrder(vtSymbol,CTAORDER_SELL, price, volume, account)
+        return self.sendOrder(vtSymbol,CTAORDER_SELL, price, volume, priceType=priceType,account=account)
 
         # ----------------------------------------------------------------------
 
-    def short(self, vtSymbol,price, volume, account=''):
+    def short(self, vtSymbol,price, volume, priceType = CtpConstantsOrderPriceType.PRICETYPE_LIMITPRICE, account=''):
         """卖开"""
-        return self.sendOrder(vtSymbol,CTAORDER_SHORT, price, volume, account)
+        return self.sendOrder(vtSymbol,CTAORDER_SHORT, price, volume,priceType=priceType,account=account)
 
         # ----------------------------------------------------------------------
 
-    def cover(self, vtSymbol,price, volume, account=''):
+    def cover(self, vtSymbol,price, volume, priceType = CtpConstantsOrderPriceType.PRICETYPE_LIMITPRICE,  account=''):
         """买平"""
-        return self.sendOrder(vtSymbol,CTAORDER_COVER, price, volume, account)
+        return self.sendOrder(vtSymbol,CTAORDER_COVER, price, volume,priceType=priceType,account=account)
 
     def roundToPriceTick(self, priceTick, price):
         """取整价格到合约最小价格变动"""
@@ -217,8 +267,14 @@ class FutureHandler(ProductHandler):
         return quota
 
         # ----------------------------------------------------------------------
-    def sendOrder(self, vtSymbol, orderType, price, volume, account=''):
-        """发单"""
+    def sendOrder(self, vtSymbol, orderType, price, volume, priceType = PRICETYPE_LIMITPRICE,account=''):
+        """发单
+            priceType:
+                PRICETYPE_LIMITPRICE = u'限价'
+                PRICETYPE_MARKETPRICE = u'市价'
+                PRICETYPE_FAK = u'FAK'
+                PRICETYPE_FOK = u'FOK'
+        """
         from mantis.trade.utils import get_contract_detail
 
         # contract = self.mainEngine.getContract(vtSymbol)
@@ -226,9 +282,7 @@ class FutureHandler(ProductHandler):
         if not quota:
             return []
 
-
-        contract = VtContractData()
-        contract.__dict__ = get_contract_detail(vtSymbol)
+        contract = get_contract_detail(vtSymbol)
 
         req = VtOrderReq()
         req.symbol = contract.symbol
@@ -241,7 +295,7 @@ class FutureHandler(ProductHandler):
         # req.currency = strategy.currency
 
         # 设计为CTA引擎发出的委托只允许使用限价单
-        req.priceType = PRICETYPE_LIMITPRICE
+        req.priceType = priceType # PRICETYPE_LIMITPRICE
 
         # CTA委托类型映射
         if orderType == CTAORDER_BUY:
@@ -260,7 +314,10 @@ class FutureHandler(ProductHandler):
             req.direction = DIRECTION_LONG
             req.offset = OFFSET_CLOSE
 
-        return quota.trade_proxy.sendOrder(req,self.service.service_id)
+        order_ids =  quota.trade_proxy.sendOrder(req,self.service.service_id)
+        for order_id in order_ids:
+            quota.order_ids.append(order_id)
+        return order_ids
 
     def cancelOrder(self, order_id,account=''):
         """撤单"""
@@ -280,6 +337,21 @@ class FutureHandler(ProductHandler):
         #     self.ctaEngine.cancelOrder(vtOrderID)
 
         # ----------------------------------------------------------------------
+    def cancelAllOrders(self,account=''):
+        """全部撤单"""
+        # 如果未指定 account ,则撤所有账户下的委托订单
+        if not account:
+            accounts = self.accounts.keys()
+            for account in accounts:
+                quota = self.prepare_account(account)
+                if quota:
+                    quota.trade_proxy.cancelAllOrders()
+        else: # 撤指定的账户下的委托订单
+            quota = self.prepare_account(account)
+            if not quota:
+                return
+            quota.trade_proxy.cancelAllOrders()
+
 
     def getOrder(self,order_id,account=''):
         quota = self.prepare_account(account)
@@ -311,12 +383,21 @@ class FutureHandler(ProductHandler):
             return []
         return quota.trade_proxy.getAllAccounts()
 
-    def cancelAll(self):
-        """全部撤单"""
-        # self.ctaEngine.cancelAll(self.name)
-        pass
+    def getCurrentAccount(self,account=''):
+        quota = self.prepare_account(account)
+        if not quota:
+            return None
+        return quota.trade_proxy.getCurrentAccount()
 
-    def loadTicks(self, symbol, days=1, limit=0):
+    def getContract(self,symbol):
+        from mantis.trade.utils import get_contract_detail
+        return get_contract_detail(symbol)
+
+    def getLastestTick(self,symbol):
+        from mantis.trade.utils import get_current_tick
+        return get_current_tick(symbol)
+
+    def loadTicks(self, symbol, limit=0):
         """读取tick数据
         向 DataResService 发起 http 查询请求
         :param symbol: 合约代码
@@ -326,17 +407,17 @@ class FutureHandler(ProductHandler):
         直接连接到mongodb 读取tick数据
         """
         # return DataResServiceProxy().queryTicks(symbol, days, limit, product_class)
-        return self.datares_proxy.queryTicks(symbol,days,limit,product_class=ProductClass.Future)
+        return self.datares_proxy.queryTicks(symbol,limit,product_class=ProductClass.Future)
         # ----------------------------------------------------------------------
 
-    def loadBars(self, symbol, scale, days=1, limit=0):
+    def loadBars(self, symbol, scale, limit=0):
         """读取bar数据
         :param symbol: 合约代码
         :param scale : bar时间宽度 1m,5m,15m,..
         :param days:  距今天数
         :param limit: 最大的bar数量 , 0: 未限制
         """
-        return self.datares_proxy.queryBars(symbol,scale, days, limit, product_class=ProductClass.Future)
+        return self.datares_proxy.queryBars(symbol,scale,  limit, product_class=ProductClass.Future)
 
 
 class StockHandler(ProductHandler):

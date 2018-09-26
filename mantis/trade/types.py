@@ -15,6 +15,8 @@ class ServiceType(object):
     StrategyDevRunner      = ValueEntry('strategy_dev_runner',u'策略容器')
     StrategyLauncher    = ValueEntry('strategy_launcher',u'策略加载器')
     FrontLauncher       = ValueEntry('front_launcher',u'前端服务加载器,负责交易/行情适配器的加载')
+    XtpMonitor       = ValueEntry('xtp_monitor',u'')
+    LatchetServer    = ValueEntry('latchet_server',u'消息转发到http-websocket')
 
 
 class TimeDuration(object):
@@ -23,6 +25,7 @@ class TimeDuration(object):
     HOUR       = MINUTE * 60
     MINUTE_1   = MINUTE
     MINUTE_2   = MINUTE * 2
+    MINUTE_3   = MINUTE * 3
     MINUTE_5   = MINUTE * 5
     MINUTE_15  = MINUTE * 15
     MINUTE_30  = MINUTE * 30
@@ -31,9 +34,11 @@ class TimeDuration(object):
     SCALES ={
         '1m':MINUTE_1,
         '2m':MINUTE_2,
+        '3m':MINUTE_3,
         '5m':MINUTE_5,
         '15m':MINUTE_15,
         '30m':MINUTE_30,
+        '60m':HOUR_1,
         '1h':HOUR_1,
         '1d':DAY
     }
@@ -46,6 +51,10 @@ class ProductClass(object):
     Undefined   = 'undefined'
     Future      = 'future'
     Stock       = 'stock'
+    Coin        = 'coin'
+
+class CryptoCoinType(object):
+    Binance = 'binance'
 
 class TradeAccount(object):
     """
@@ -75,6 +84,7 @@ class TradeAccountQuota(object):
         self.props = {}
         self.channels = {}       # 交互通道
         self.trade_proxy = None # 交易代理对象
+        self.order_ids = []
 
     def dumps(self):
         result = dict( name = self.name, account = self.account , limit = self.limit)

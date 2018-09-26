@@ -21,19 +21,24 @@ class Message(object):
 
     @staticmethod
     def unmarshall(data):
-        if not isinstance(data,dict):
-            data = json.loads(data)
-
-        msg = None
         try:
+            if not isinstance(data,dict):
+                data = json.loads(data)
+
+            msg = None
+
             msg = Message()
             msg.name = data.get('name','')
             msg.data = data.get('data',{})
             msg.head = data.get('head',{})
         except:
             traceback.print_exc()
+            print 'Exception Data:',data
             msg = None
         return msg
+
+    def __str__(self):
+        return 'Name:{}\nHead:{}\nData:{}'.format(self.name,self.head,self.data)
 
 class Request(object):
     def __init__(self, channel,back_url=''):

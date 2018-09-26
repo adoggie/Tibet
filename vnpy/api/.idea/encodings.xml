@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="Encoding">
+    <file url="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcMdApi.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcTraderApi.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcUserApiDataType.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcUserApiStruct.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/vnxtpquote/vnxtpquote/vnxtpquote.cpp" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/vnxtpquote/vnxtpquote/vnxtpquote.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/vnxtptrader/vnxtptrader/vnxtptrader.cpp" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/vnxtptrader/vnxtptrader/vnxtptrader.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/xtpapi/xoms_api_fund_struct.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/xtpapi/xoms_api_struct.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/xtpapi/xquote_api_struct.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/xtpapi/xtp_api_data_type.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/xtpapi/xtp_api_struct.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/xtpapi/xtp_api_struct_common.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/xtpapi/xtp_quote_api.h" charset="GB2312" />
+    <file url="file://$PROJECT_DIR$/xtp/xtpapi/xtp_trader_api.h" charset="GB2312" />
+  </component>
+</project>

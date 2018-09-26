@@ -283,7 +283,10 @@ def run_local_name(name,KeyPrefix,service):
     # 本地开发运行策略
     main = service
     main.controller.loadStrategy(name) # 加载策略目录下的指定策略名称的启动模块
-    main.controller.open() # 开始
+
+    # 可以启动进程但不运行策略
+    if  main.cfgs.get('auto_start',True):
+        main.controller.open() # 开始
     print 'Strategy: {}  start running..'.format(name)
 
 

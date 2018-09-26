@@ -116,3 +116,15 @@ class ObjectBuilder(object):
         for k,v in data.items():
             setattr( newobj,str(k),v)
         return newobj
+
+def string_list(s,sep=','):
+    return map(str.strip,s.split(sep))
+
+class Sequence(object):
+    def __init__(self,init_val = 0,step=1):
+        self.value = init_val
+        self.step = step
+
+    def next(self):
+        self.value+=self.step
+        return self.value

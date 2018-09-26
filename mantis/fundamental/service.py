@@ -49,9 +49,9 @@ class ServiceManager(object):
             print 'Initing Serivce: {} ..'.format(name)
 
 
-    def start(self):
+    def start(self,block=False):
         for s in self.services.values():
-            s.start(False)
+            s.start(block)
 
     def stop(self):
         for s in self.services.values():

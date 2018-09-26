@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <link rel="shortcut icon" href="/static/images/carrun_2x.png" />
+    <title>交易策略系统</title>
+    <link type="text/css" rel="stylesheet" href="/static/style/common.css?v=20170527020">
+    <link type="text/css" rel="stylesheet" href="/static/style/blue.css?v=20170527020">
+    <link type="text/css" rel="stylesheet" href="/static/style/styles.css?v=20170527020">
+    <link rel="stylesheet" href="/static/js/lib/bootstrap/css/bootstrap.css">
+    <link rel="stylesheet" type="text/css" href="/static/js/lib/bootstrap/css/bootstrap-datetimepicker.min.css">
+    <link rel="stylesheet" type="text/css" href="/static/js/lib/jqueryui/jquery-ui.min.css">
+    <link rel="stylesheet" href="/static/style/font-awesome/css/font-awesome.min.css">
+    <script type="text/javascript"  src="/static/js/lib/jquery-1.11.1.min.js"></script>
+    <script type="text/javascript"  src="/static/js/lib/jqueryui/jquery-ui.min.js"></script>
+    <script type="text/javascript" src="/static/js/lib/bootstrap/js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="/static/js/lib/bootstrap/js/bootstrap-datetimepicker.js"></script>
+    <script type="text/javascript" src="/static/js/lib/bootstrap/js/bootstrap-datetimepicker.zh-CN.js" charset="UTF-8"></script>
+</head>
+<body style="margin: 20px">
+<h2 >System Profile</h2>
+
+<div>
+    <h3>Quotas</h3>
+    {% for account  in profiles.futures.accounts %}
+    Name:{{account.name}}
+    <br>
+    Account:{{account.account}}
+    <br>
+    Product:{{account.product}}
+    <br>
+    Trade-Proxy:{{account.proxy_http}}
+    <br>
+
+
+     <h3>Funds Detail</h3>
+    昨日账户结算净值:{{account.data.currentaccount.preBalance}}
+    <br>
+    可用资金:{{account.data.currentaccount.available}}
+    <br>
+    账户净值:{{account.data.currentaccount.balance}}
+    <br>
+    今日手续费:{{account.data.currentaccount.commission}}
+    <br>
+    保证金占用:{{account.data.currentaccount.margin}}
+    <br>
+    平仓盈亏:{{account.data.currentaccount.closeProfit}}
+    <br>
+    持仓盈亏:{{account.data.currentaccount.positionProfit}}
+    <br>
+
+     <h3>Position Detail</h3>
+    {% for pos in account.data.positions %}
+    <h5>{{pos.symbol}}</h5>
+
+    持仓方向:{{pos.direction}}
+    <br>
+    持仓量:{{pos.position}}
+    <br>
+    冻结数量:{{pos.frozen}}
+    <br>
+    持仓均价:{{pos.price}}
+    <br>
+    保证金占用:{{account.data.currentaccount.margin}}
+    <br>
+    持仓在vt系统中的唯一代码:{{pos.vtPositionName}}
+    <br>
+    昨持仓:{{pos.ydPosition}}
+    <br>
+    持仓盈亏:{{pos.positionProfit}}
+    <br>
+
+    {% endfor %}  <!--end position -->
+
+
+     <h3>Order Detail</h3>
+    {% for order in account.data.orders %}
+
+    <h5>合约代码:{{order.symbol}}</h5>
+    <br>
+    订单编号:{{order.orderID}}
+    <br>
+    系统中的唯一编号:{{order.vtOrderID}}
+    <br>
+    报单方向:{{order.direction}}
+    <br>
+    报单开平仓:{{order.offset}}
+    <br>
+    报单价格:{{order.price}}
+    <br>
+    报单总数量:{{order.totalVolume}}
+    <br>
+    报单成交数量:{{order.tradedVolume}}
+    <br>
+    报单状态:{{order.status}}
+    <br>
+
+    发单时间:{{order.orderTime}}
+    <br>
+     撤单时间:{{order.cancelTime}}
+    <br>
+     前置机编号:{{order.frontID}}
+    <br>
+     连接编号:{{order.sessionID}}
+    <br>
+
+    {% endfor %}  <!-- end orders -->
+
+     <h3>Trade Detail</h3>
+    {% for trade in account.data.trades %}
+
+    <h5>合约代码:{{trade.symbol}}</h5>
+    <br>
+    成交编号:{{trade.tradeID}}
+    <br>
+    系统中的唯一编号:{{trade.vtTradeID}}
+    <br>
+    订单编号:{{trade.orderID}}
+    <br>
+    订单在vt系统中的唯一编号:{{trade.vtOrderID}}
+    <br>
+    成交方向:{{trade.direction}}
+    <br>
+    成交开平仓:{{trade.offset}}
+    <br>
+    成交价格:{{trade.price}}
+    <br>
+    成交数量:{{trade.volume}}
+    <br>
+
+    成交时间:{{trade.tradeTime}}
+    <br>
+
+
+    {% endfor %}  <!-- end trade -->
+
+
+    {% endfor %}
+</div>
+
+<div>
+<a href="orders" target="_blank">订单操作</a>
+</div>
+<div>
+<a href="syscmd" target="_blank">系统操作</a>
+</div>
+
+</body>
+</html>

@@ -5,6 +5,7 @@ import copy
 from vnpy.trader.vtConstant import *
 from vnpy.trader.vtEvent import *
 from vnpy.trader.vtObject import *
+from mantis.fundamental.application.app import instance
 
 class DataEngine(object):
     """数据引擎"""
@@ -21,7 +22,7 @@ class DataEngine(object):
         self.workingOrderDict = {}  # 可撤销委托
         self.tradeDict      = {}
         self.accountDict    = {}
-        self.positionDict   = {}
+        self.positionDict   = {}    # vtSymbol.DIRECTION => position 每个合约都有两个方向的Key（LONG/SHORT）
         self.logList        = []
         self.errorList      = []
 
@@ -36,6 +37,8 @@ class DataEngine(object):
 
         # 注册事件监听
         self.registerEvent()
+
+        self.request_id_with_strategy_map = {}   # 发单编号与请求策略编号的映射关系
 
     # ----------------------------------------------------------------------
     def registerEvent(self):
@@ -65,9 +68,15 @@ class DataEngine(object):
         """处理委托事件"""
         from mantis.trade.command import OnOrderData
         from mantis.trade.message import Message
+        from mantis.fundamental.utils.timeutils import current_datetime_string
 
         order = event.dict_['data']
-        self.orderDict[order.vtOrderID] = order
+
+        order.datetime = current_datetime_string()
+        # order.orderID = order.orderID.strip()
+        # order.vtOrderID = order.vtOrderID.replace(' ','')
+
+        self.orderDict[order.vtOrderID] = order  #'CTP.1'
 
         # 如果订单的状态是全部成交或者撤销，则需要从workingOrderDict中移除
         if order.status in self.FINISHED_STATUS:
@@ -81,7 +90,11 @@ class DataEngine(object):
         detail = self.getPositionDetail(order.vtSymbol)
         detail.updateOrder(order)
 
-        msg = Message(OnOrderData.NAME,data=order.__dict__)
+        #找到请求发出时关联的策略编号
+        strategy_id = self.service.request_id_manager.get(order.request_id)
+        order.strategy_id = strategy_id
+        # strategy_id = self.request_id_with_strategy_map.get(order.request_id,'')
+        msg = Message(OnOrderData.NAME,data=order.__dict__,head={'strategy_id':strategy_id})
         self.service.publishMessage(msg)
         # ----------------------------------------------------------------------
 
@@ -103,21 +116,30 @@ class DataEngine(object):
 
     def processPositionEvent(self, event):
         """处理持仓事件"""
+        from mantis.trade.command import OnPositionData
+        from mantis.trade.message import Message
         pos = event.dict_['data']
 
-        self.positionDict[pos.vtPositionName] = pos
+        self.positionDict[pos.vtPositionName] = pos # 同一合约两个方向 LONG/SHORT
 
         # 更新到持仓细节中
         detail = self.getPositionDetail(pos.vtSymbol)
         detail.updatePosition(pos)
 
+        msg = Message(OnPositionData.NAME,data = pos.__dict__)
+        self.service.publishMessage(msg)
         # ----------------------------------------------------------------------
 
     def processAccountEvent(self, event):
         """处理账户事件"""
+        from mantis.trade.command import OnAccountData
+        from mantis.trade.message import Message
+
         account = event.dict_['data']
         self.accountDict[account.vtAccountID] = account
 
+        msg = Message(OnAccountData.NAME,data = account.__dict__)
+        self.service.publishMessage(msg)
     # ----------------------------------------------------------------------
     def processLogEvent(self, event):
         """处理日志事件"""
@@ -131,7 +153,7 @@ class DataEngine(object):
         self.errorList.append(error)
 
     # ----------------------------------------------------------------------
-    def getContract(self, vtSymbol):
+    def getContract(self, vtSymbol,strategy_id=''):
         """查询合约对象"""
         try:
             return self.contractDict[vtSymbol]
@@ -161,7 +183,7 @@ class DataEngine(object):
     #     f.close()
 
     # ----------------------------------------------------------------------
-    def getOrder(self, vtOrderID):
+    def getOrder(self, vtOrderID,strategy_id=''):
         """查询委托"""
         try:
             return self.orderDict[vtOrderID]
@@ -169,27 +191,27 @@ class DataEngine(object):
             return None
 
     # ----------------------------------------------------------------------
-    def getAllWorkingOrders(self):
+    def getAllWorkingOrders(self,strategy_id=''):
         """查询所有活动委托（返回列表）"""
         return self.workingOrderDict.values()
 
     # ----------------------------------------------------------------------
-    def getAllOrders(self):
+    def getAllOrders(self,strategy_id=''):
         """获取所有委托"""
         return self.orderDict.values()
 
     # ----------------------------------------------------------------------
-    def getAllTrades(self):
+    def getAllTrades(self,strategy_id=''):
         """获取所有成交"""
         return self.tradeDict.values()
 
     # ----------------------------------------------------------------------
-    def getAllPositions(self):
+    def getAllPositions(self,strategy_id=''):
         """获取所有持仓"""
         return self.positionDict.values()
 
     # ----------------------------------------------------------------------
-    def getAllAccounts(self):
+    def getAllAccounts(self,strategy_id=''):
         """获取所有资金"""
         return self.accountDict.values()
 
@@ -214,14 +236,14 @@ class DataEngine(object):
                     detail.mode = detail.MODE_SHFE
 
                 # 检查是否有平今惩罚
-                for productID in self.tdPenaltyList:
+                for productID in self.tdPenaltyList: # 这个东西写在 Vt_settings.json中， 暂时未发现哪里赋值
                     if str(productID) in contract.symbol:
                         detail.mode = detail.MODE_TDPENALTY
 
         return detail
 
     # ----------------------------------------------------------------------
-    def getAllPositionDetails(self):
+    def getAllPositionDetails(self,strategy_id=''):
         """查询所有本地持仓缓存细节"""
         return self.detailDict.values()
 
@@ -252,29 +274,39 @@ class DataEngine(object):
         """获取错误"""
         return self.errorList
 
-    def sendOrder(self,order_req):
+    def sendOrder(self,order_req,strategy_id=''):
+        """发送订单请求"""
         mainEngine = self.service.mainEngine
-        reqList = mainEngine.convertOrderReq(order_req)
+        # reqList = mainEngine.convertOrderReq(order_req)
+        reqList = self.convertOrderReq(order_req) # 内部需细化
         vtOrderIDList = []
+        reqList = [order_req]
+        coll = self.service.tradelog_db['send_order']
 
-        if not reqList:
-            return vtOrderIDList
+        for req in reqList:
+            req.strategy_id = strategy_id
+            # 通过主控服务获得请求发单的序号,并与策略编号关联
+            req.request_id = self.service.request_id_generator.next_id().request_id
+            self.service.request_id_manager.set( req.request_id, strategy_id)
 
-        for convertedReq in reqList:
-            vtOrderID = mainEngine.sendOrder(convertedReq, self.service.gatewayName)  # 发单
+        for req in reqList:
+            vtOrderID = mainEngine.sendOrder(req, self.service.gatewayName)  # 发单
             # self.orderStrategyDict[vtOrderID] = strategy  # 保存vtOrderID和策略的映射关系
             # self.strategyOrderDict[strategy.name].add(vtOrderID)  # 添加到策略委托号集合中
             vtOrderIDList.append(vtOrderID)
+            coll.insert_one(req.__dict__)
 
         # self.writeCtaLog(u'策略%s发送委托，%s，%s，%s@%s'
         #                  % (strategy.name, vtSymbol, req.direction, volume, price))
-
+        # 回送编号到调用客户端没有意义
+        # 只有当Order回报时将订单编号推送到用户端
         return vtOrderIDList
 
-    def cancelOrder(self,vtOrderID):
+    def cancelOrder(self,vtOrderID,strategy_id=''):
         """撤销订单"""
         mainEngine = self.service.mainEngine
-        order = mainEngine.getOrder(vtOrderID)
+        # order = mainEngine.getOrder(vtOrderID)
+        order = self.getOrder(vtOrderID)  # 从缓存的发单编号列表中获得订单数据
 
         # 如果查询成功
         if order:
@@ -282,14 +314,31 @@ class DataEngine(object):
             orderFinished = (order.status == STATUS_ALLTRADED or order.status == STATUS_CANCELLED)
             if not orderFinished:
                 req = VtCancelOrderReq()
+                req.request_id = self.service.request_id_generator.next_id().request_id
+                req.strategy_id = strategy_id
+
                 req.symbol = order.symbol
                 req.exchange = order.exchange
                 req.frontID = order.frontID
                 req.sessionID = order.sessionID
                 req.orderID = order.orderID
                 mainEngine.cancelOrder(req, order.gatewayName)
-        else:
+
+                coll = self.service.tradelog_db['cancel_order']
+                coll.insert_one(req.__dict__)
+
+        else: # 订单不能匹配到（不存在或者报单已成交或撤销)_
             self.service.logger.error('no order  matched:'+ vtOrderID)
+
+    def closeAllTrades(self,strategy_id=''):
+        """平仓所有持仓"""
+
+        pass
+
+    def cancelAllOrders(self,strategy_id=''):
+        orders = self.getAllOrders()
+        for order in orders:
+            self.cancelOrder(order.vtOrderID)
 
 class PositionDetail(object):
     """本地维护的持仓信息"""
@@ -297,7 +346,7 @@ class PositionDetail(object):
 
     MODE_NORMAL = 'normal'  # 普通模式
     MODE_SHFE = 'shfe'  # 上期所今昨分别平仓
-    MODE_TDPENALTY = 'tdpenalty'  # 平今惩罚
+    MODE_TDPENALTY = 'tdpenalty'  # 平今惩罚（手续费比昨仓高）
 
     # ----------------------------------------------------------------------
     def __init__(self, vtSymbol, contract=None):
@@ -314,22 +363,22 @@ class PositionDetail(object):
             self.name = contract.name
             self.size = contract.size
 
-        self.longPos = EMPTY_INT
+        self.longPos = EMPTY_INT        # 所持多单总数
         self.longYd = EMPTY_INT
         self.longTd = EMPTY_INT
         self.longPosFrozen = EMPTY_INT
         self.longYdFrozen = EMPTY_INT
         self.longTdFrozen = EMPTY_INT
-        self.longPnl = EMPTY_FLOAT
+        self.longPnl = EMPTY_FLOAT  # 持仓盈亏
         self.longPrice = EMPTY_FLOAT
 
-        self.shortPos = EMPTY_INT
+        self.shortPos = EMPTY_INT       # 所持空单总数 （ 向下做空总数 ）
         self.shortYd = EMPTY_INT
         self.shortTd = EMPTY_INT
         self.shortPosFrozen = EMPTY_INT
         self.shortYdFrozen = EMPTY_INT
         self.shortTdFrozen = EMPTY_INT
-        self.shortPnl = EMPTY_FLOAT
+        self.shortPnl = EMPTY_FLOAT     # 持仓盈亏
         self.shortPrice = EMPTY_FLOAT
 
         self.lastPrice = EMPTY_FLOAT
@@ -343,12 +392,12 @@ class PositionDetail(object):
     def updateTrade(self, trade):
         """成交更新"""
         # 多头
-        if trade.direction is DIRECTION_LONG:
+        if trade.direction is DIRECTION_LONG: # 买入
             # 开仓
             if trade.offset is OFFSET_OPEN:
-                self.longTd += trade.volume
+                self.longTd += trade.volume         # 买入开仓，多持增加 (买入增加多单)
             # 平今
-            elif trade.offset is OFFSET_CLOSETODAY:
+            elif trade.offset is OFFSET_CLOSETODAY: # 卖平，空持减少 （ 买入减少空单)
                 self.shortTd -= trade.volume
             # 平昨
             elif trade.offset is OFFSET_CLOSEYESTERDAY:
@@ -365,7 +414,7 @@ class PositionDetail(object):
                     if self.shortTd < 0:
                         self.shortYd += self.shortTd
                         self.shortTd = 0
-                        # 空头
+        # 空头
         elif trade.direction is DIRECTION_SHORT:
             # 开仓
             if trade.offset is OFFSET_OPEN:
@@ -485,7 +534,7 @@ class PositionDetail(object):
     # ----------------------------------------------------------------------
     def calculatePosition(self):
         """计算持仓情况"""
-        self.longPos = self.longTd + self.longYd
+        self.longPos = self.longTd + self.longYd        # 昨仓 + 今仓
         self.shortPos = self.shortTd + self.shortYd
 
         # ----------------------------------------------------------------------
@@ -502,7 +551,7 @@ class PositionDetail(object):
 
         # 遍历统计
         for order in self.workingOrderDict.values():
-            # 计算剩余冻结量
+            # 计算剩余冻结量， frozenVolume 是未成交量
             frozenVolume = order.totalVolume - order.tradedVolume
 
             # 多头委托
@@ -552,19 +601,19 @@ class PositionDetail(object):
         # ----------------------------------------------------------------------
 
     def convertOrderReq(self, req):
-        """转换委托请求"""
+        """转换委托请求, 一个委托可能被拆成多个委托，或者委托禁止"""
         # 普通模式无需转换
-        if self.mode is self.MODE_NORMAL:
+        if self.mode is self.MODE_NORMAL:  # 在 DataEngine中创建PositionDetail对象时赋值，主要用于区别合约归属那个交易所
             return [req]
 
         # 上期所模式拆分今昨，优先平今
-        elif self.mode is self.MODE_SHFE:
+        elif self.mode is self.MODE_SHFE:  # 上期所的合约处理方式不同
             # 开仓无需转换
-            if req.offset is OFFSET_OPEN:
+            if req.offset is OFFSET_OPEN: # 开仓放行
                 return [req]
-
+            # 平仓处理
             # 多头
-            if req.direction is DIRECTION_LONG:
+            if req.direction == DIRECTION_LONG:
                 posAvailable = self.shortPos - self.shortPosFrozen
                 tdAvailable = self.shortTd - self.shortTdFrozen
                 ydAvailable = self.shortYd - self.shortYdFrozen

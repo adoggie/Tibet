@@ -4,10 +4,12 @@ import json
 import datetime
 from mantis.fundamental.application.app import instance
 from mantis.fundamental.utils.timeutils import datetime_to_timestamp
+from mantis.fundamental.utils.useful import Sequence
 
 CTP_TICK_DB_NAME ='Ctp_Tick'
 CTP_BAR_DB_NAME = 'Ctp_Bar'
 
+sequence = Sequence()
 
 def get_message_on_ctp_ticks(message,ctx):
     """get message from market-adapter via redis-queue, then put it into mongodb
@@ -17,6 +19,8 @@ def get_message_on_ctp_ticks(message,ctx):
     tick = json.loads(data)
     tick['datetime'] = datetime.datetime.strptime(' '.join([tick.get('date'), tick.get('time')]), '%Y%m%d %H:%M:%S.%f')
     tick['ts'] = datetime_to_timestamp(tick['datetime'])
+    tick['seq'] = sequence.next()   # 增加序列号
+    tick['flag'] = 0
     tablename = tick.get('_table_')
     if not tablename:
         tablename = tick.get('vtSymbol')

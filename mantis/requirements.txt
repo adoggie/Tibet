@@ -49,5 +49,6 @@ ta-lib
 grequests
 pp  # https://www.parallelpython.com/content/view/15/30/#QUICKSMP
 redlock-py
+fire
 
 #qpid-python-1.36.0.tar.gz

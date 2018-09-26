@@ -1,6 +1,6 @@
 
-app_name: 'testModule'
-project_name: 'testProject'
+app_name: 'PAServer'
+project_name: 'Tibet'
 project_version: '0.1'
 
 logging:
@@ -57,8 +57,9 @@ http_trace: #自动日志记录
 datasources:
   - name: 'mongodb'
     class: 'mantis.fundamental.nosql.mongo.Datasource'
-    host:
-    port:
+#    host: 'mongodb'
+    host: '192.168.99.22'
+    port: 27018
     dbname:
     user:
     password:
@@ -72,8 +73,10 @@ datasources:
 
   - name: 'redis'
     class: 'mantis.fundamental.redis.datasource.Datasource'
-    host: '172.16.109.1'
-    port: 6379
+#    host: '172.16.109.1'
+    host: '192.168.99.22'
+#    port: 6379
+    port: 6380
     password: ''
     db: 0
     enable: true
@@ -93,8 +96,9 @@ message_brokers:
 
   - name: 'redis'
     class: 'mantis.fundamental.redis.broker.MessageBroker'
-    host: '172.16.109.1'
-    port: 6379
+#    host: 'redis'
+    host: '192.168.99.22'
+    port: 6380
     password: ''
     db: 0
     enable: true
@@ -118,7 +122,7 @@ services:
       SECRET_KEY : "abc"
     http:
       host : '127.0.0.1'
-      port : 18901
+      port : 18802
       threaded: false
       debug: true
 
@@ -136,17 +140,22 @@ services:
     enable:     true
     class:      'main.PAService'
 
-    generate_bars: '1m,5m,15m,30m,1h'
+    generate_bars: '1m,3m,5m,15m,30m,60m'
 #    generate_bars: '1m,2m'
 
     fanout:
       - name: 'switch0'
         channels:
-          - 'redis/future_ctp_bars/queue'
+#          - 'redis/future_ctp_bars/queue'
           - 'redis/future_ctp_bar_{symbol}_{scale}/pubsub'
       - name: 'logging'
         channels:
           - 'redis/trade.log.{service_type}/queue'
           - 'redis/trade.log.{service_type}.{service_id}/pubsub'
+    debug:
+      enable: true
+      symbols:
+        - 'AP810'
+        - 'AP901'
 
-
+    kline_symbols: 'm1901,RM809,y1809,c1901,AP810,CF901,a1901,hc1810,rb1810'

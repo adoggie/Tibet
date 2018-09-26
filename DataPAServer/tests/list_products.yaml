@@ -1,0 +1,30 @@
+
+# 上架的合约产品
+
+product_trade_spaces:
+  sf_1:
+    - 'RU,RB'
+    - 'BU,HC'
+  sf_2:
+    - 'CU'
+    - 'AL'
+    - 'ZN,PB,NI,SN'
+  sf_3:
+    - 'AU,AG'
+  sf_4:
+    - 'FU,WR'
+  ds_1:
+    - 'P,J,M,Y,A,B,JM,I'
+  ds_2:
+    - 'BB,C,CS,FB,L,PP,V,JD'
+
+  zs_1:
+    - 'SR,CF,RM,MA,TA,ZC,FG,OI,CY'
+  zs_2:
+    - 'JR,LR,PM,RI,RS,SF,SM,WH'
+  zj_1:
+    - 'IF,IH,IC'
+  zj_2:
+    - 'TF,T'
+  ny_1:
+    - 'sc'

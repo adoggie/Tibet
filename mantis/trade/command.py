@@ -59,20 +59,43 @@ class CancelOrder(VtCancelOrderReq):
                 self.value.__dict__ = data.get('result')
             return self
 
+class CancelAllOrders(object):
+    """取消所有订单"""
+    NAME = 'cancel_all_orders'
+
+class SellOrCoverAllTrades(object):
+    """平仓所持有的仓位（平金、平⬅昨）"""
+    NAME = 'sell_or_cover_all_trades'
+
 # class StopOrderRequest(Vt)
-class OnPositionData(VtPositionData):
+class TradeAdapterResponseData(object):
+    def __init__(self):
+        self.account = ''  # 期货、股票账户名称
+        self.product = ''  # 期货还是股票 feture/stock
+
+class OnPositionData(VtPositionData,TradeAdapterResponseData):
     NAME = 'on_position_data'
+    def __init__(self):
+        VtPositionData.__init__(self)
+        TradeAdapterResponseData.__init__(self)
 
-class OnOrderData(VtOrderData):
+class OnOrderData(VtOrderData,TradeAdapterResponseData):
     NAME = 'on_order_data'
+    def __init__(self):
+        VtOrderData.__init__(self)
+        TradeAdapterResponseData.__init__(self)
 
-class OnTradeData(VtTradeData):
+class OnTradeData(VtTradeData,TradeAdapterResponseData):
     NAME = 'on_trade_data'
+    def __init__(self):
+        VtTradeData.__init__(self)
+        TradeAdapterResponseData.__init__(self)
 
-
-class OnAccountData(VtAccountData):
+class OnAccountData(VtAccountData,TradeAdapterResponseData):
     NAME = 'on_account_data'
-
+    def __init__(self):
+        VtAccountData.__init__(self)
+        TradeAdapterResponseData.__init__(self)
 
 class GetOrder(object):
     NAME = 'get_order'
@@ -164,8 +187,23 @@ class GetAllAccounts(object):
             return self
 
 
+class StrategyLogContent(object):
+    """
+    策略日志级别
+    """
+    NAME = 'strategy_log_content'
+    def __init__(self):
+        self.strategy_id = ''
+        self.datetime = ''
+        self.timestamp = 0
+        self.service_type = ''
+        self.service_id = ''
+        self.text = ''
+        self.level = ''
 
-
+    @property
+    def plainText(self):
+        return 'Time:{}|Strategy:{}|Text:{}'.format(self.timestamp,self.strategy_id,self.text)
 
 
 

@@ -17,6 +17,9 @@ def str_to_timestamp(time_str):
 # datetimestring = 'Fri, 08 Jun 2012 22:40:26 GMT'
 # str_to_timestamp(datetimestring)
 
+def current_datetime_string():
+    return timestamp_to_str(timestamp_current())
+
 def timestamp_current():
     return int(time.time())
 

@@ -57,7 +57,10 @@ def loadIconPath(iconName):
 #----------------------------------------------------------------------
 def getTempPath(name):
     """获取存放临时文件的路径"""
-    tempPath = os.path.join(os.getcwd(), 'temp')
+    # from base64 import urlsafe_b64encode
+    from mantis.fundamental.application.app import instance
+    tempPath = os.path.join(instance.getTempPath(),instance.getName().translate(None,'\\/ '))
+    # tempPath = os.path.join(os.getcwd(), 'temp')
     if not os.path.exists(tempPath):
         os.makedirs(tempPath)
         

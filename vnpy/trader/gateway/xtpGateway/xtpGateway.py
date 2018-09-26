@@ -108,19 +108,20 @@ class XtpGateway(VtGateway):
         self.filePath = getJsonPath(self.fileName, __file__) 
         
     #----------------------------------------------------------------------
-    def connect(self):
+    def connect(self,cfgs):
         """连接"""
-        try:
-            f = file(self.filePath)
-        except IOError:
-            log = VtLogData()
-            log.gatewayName = self.gatewayName
-            log.logContent = u'读取连接配置出错，请检查'
-            self.onLog(log)
-            return
-        
-        # 解析json文件
-        setting = json.load(f)  
+        # try:
+        #     f = file(self.filePath)
+        # except IOError:
+        #     log = VtLogData()
+        #     log.gatewayName = self.gatewayName
+        #     log.logContent = u'读取连接配置出错，请检查'
+        #     self.onLog(log)
+        #     return
+        #
+        # # 解析json文件
+        # setting = json.load(f)
+        setting = cfgs
         try:
             userID = str(setting['userID'])
             password = str(setting['password'])
@@ -345,7 +346,8 @@ class XtpMdApi(QuoteApi):
         contract.size = 1
         contract.priceTick = data['price_tick']
         contract.productClass = productClassMapReverse.get(data['ticker_type'], PRODUCT_UNKNOWN)
-        
+
+        contract.last = last  # scott 2018.7.16
         self.gateway.onContract(contract)
         
     #----------------------------------------------------------------------
@@ -447,10 +449,13 @@ class XtpMdApi(QuoteApi):
         # 这里的设计是，如果尚未登录就调用了订阅方法
         # 则先保存订阅请求，登录完成后会自动订阅
         if self.loginStatus:
-            self.subscribeMarketData(str(subscribeReq.symbol), 
+            if subscribeReq:
+                self.subscribeMarketData(str(subscribeReq.symbol),
                                      exchangeMap[subscribeReq.exchange])
-        
-        self.subscribedSymbols.add(subscribeReq)   
+            else:  # 全部订阅所有股票
+                self.subscribeAllMarketData()
+        if subscribeReq:
+            self.subscribedSymbols.add(subscribeReq)
         
     #----------------------------------------------------------------------
     def unSubscribe(self, subscribeReq):

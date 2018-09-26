@@ -5,15 +5,16 @@ name: 'demo'
 user: 'scott'           # 交易用户名称
 quotas:                 # 分配的资金账号
   - name:   'q001'      # 配额名称
-    account: 'htqh-01' # 资金账户名称
+    account: 'zsqh-01' # 资金账户名称
     product: 'future'   # 期货、股票
     limit:  2000000     # 资金最大配额
 strategy:
   id: ''
   configs:      # 此处由开发人员自行配置
-    sub_ticks: 'AP810,RM809'
-    sub_bar_1m: 'AP810,RM809'
-    sub_bar_5m: 'AP810,RM809'
+    sub_ticks: 'm1901'
+#    sub_ticks: 'AP810,RM809'
+#    sub_bar_1m: 'AP810,RM809'
+#    sub_bar_5m: 'AP810,RM809'
 
   codes:
   sum:

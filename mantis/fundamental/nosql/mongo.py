@@ -14,7 +14,7 @@ from bson.objectid import ObjectId
 import gridfs
 
 class Connection:
-    def __init__(self,dbname,host='localhost',port=27017,user='',password=''):
+    def __init__(self,dbname='test',host='localhost',port=27017,user='',password=''):
         self.addr = (host,port)
         self.dbname = dbname
         self.conn = MongoClient(host,port)

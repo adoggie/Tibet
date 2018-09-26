@@ -18,6 +18,7 @@ class VtGateway(object):
         """Constructor"""
         self.eventEngine = eventEngine
         self.gatewayName = gatewayName
+        self.request_id_generator = None
         
     #----------------------------------------------------------------------
     def onTick(self, tick):
@@ -85,7 +86,7 @@ class VtGateway(object):
         self.eventEngine.put(event2)
     
     #----------------------------------------------------------------------
-    def onError(self, error):
+    def  onError(self, error):
         """错误信息推送"""
         # 通用事件
         event1 = Event(type_=EVENT_ERROR)
@@ -106,8 +107,30 @@ class VtGateway(object):
         # 通用事件
         event1 = Event(type_=EVENT_CONTRACT)
         event1.dict_['data'] = contract
-        self.eventEngine.put(event1)        
-    
+        self.eventEngine.put(event1)
+
+    # # 2018.9.7 added scott
+    # def onContractCommission(self, contract_commission):
+    #     """合约手续费率信息推送"""
+    #     # 通用事件
+    #     event1 = Event(type_=EVENT_CONTRACT_COMMISSION)
+    #     event1.dict_['data'] = contract_commission
+    #     self.eventEngine.put(event1)
+    #
+    # def onDepthMarketData(self, data):
+    #     """"""
+    #     # 通用事件
+    #     event1 = Event(type_=EVENT_DEPTH_MARKET_DATA)
+    #     event1.dict_['data'] = data
+    #     self.eventEngine.put(event1)
+
+    def onData(self,data):
+        # 通用事件
+        event1 = Event(type_=EVENT_DATA)
+        event1.dict_['data'] = data
+        self.eventEngine.put(event1)
+
+
     #----------------------------------------------------------------------
     def connect(self,*args):
         """连接"""

@@ -21,12 +21,68 @@ from vnpy.trader.vtObject import *
 from vnpy.trader.vtObject import VtSubscribeReq
 from mantis.fundamental.application.app import instance
 from mantis.fundamental.utils.useful import hash_object
+from mantis.fundamental.utils.importutils import import_module
 from mantis.trade.service import TradeService, TradeFrontServiceTraits, ServiceType
 from mantis.trade.constants import *
 from mantis.trade.types import *
 from mantis.trade.message import *
+from mantis.trade.log import StrategyLogHandler
 from mantis.trade import command
 from dataslot import DataEngine
+
+
+class TradeRequestId(object):
+    def __init__(self,req_id):
+        self.request_id = req_id
+        # self.strategy_id = strategy_id
+
+class TradeIdGenerator(object):
+    """交易请求流水号生成器"""
+    def __init__(self):
+        self.req_id = 0
+        self.redis = None
+        self.service = None
+
+
+    def init(self,cfgs):
+        """从db/redis加载当前的值"""
+
+        return self
+
+    def next_id(self):
+        """提供策略使用的request-id"""
+        self.redis = instance.datasourceManager.get('redis').conn
+        self.service = instance.serviceManager.get('main')
+        keyname = TradeRequestId_Current_Format.format(product=self.service.product,account=self.service.account)
+        request_id = self.redis.incrby(keyname,1)
+        trid = TradeRequestId(request_id)
+        return trid
+
+class TradeIdManager(object):
+    def __init__(self):
+        self.redis = None
+        self.service = None
+        self.keyname = ''
+
+    def init(self, keyname,datasource='redis',service='main'):
+        """从db/redis加载当前的值"""
+        # self.redis = instance.datasourceManager.get(datasource).conn
+        # self.service = instance.serviceManager.get(service)
+        self.keyname = keyname
+        return self
+
+    def set(self,request_id,data):
+        self.redis = instance.datasourceManager.get('redis').conn
+        self.service = instance.serviceManager.get('main')
+        self.redis.hset(self.keyname,request_id,data)
+
+    def get(self,request_id):
+        self.redis = instance.datasourceManager.get('redis').conn
+        self.service = instance.serviceManager.get('main')
+        return self.redis.hget(self.keyname,request_id)
+
+    def clear(self,request_id):
+        pass
 
 
 class TradeAdapter(TradeService, TradeFrontServiceTraits):
@@ -51,15 +107,26 @@ class TradeAdapter(TradeService, TradeFrontServiceTraits):
         self.down_counter = 0  # 继续运行标志
         self.gatewayName = ''
 
+        self.strategy_loggers = {}
+        self.request_id_generator = TradeIdGenerator()
+        self.request_id_manager = TradeIdManager()
+
+        self.tradelog_db = None
+
     def init(self, cfgs, **kwargs):
         self.parseOptions()
         super(TradeAdapter, self).init(cfgs)
-
+        self.request_id_generator.init({})
+        self.request_id_manager.init(keyname=TradeRequestId_StrategyId_HashFormat.format(product=self.product, account=self.account))
+        conn = instance.datasourceManager.get('mongodb').conn
+        dbname = TradeLog_Ctp_DBName.format(account=self.account)
+        self.tradelog_db = conn[dbname]
 
     def initCommandChannels(self):
         TradeService.initCommandChannels(self)
 
     def handle_channel_sub(self,data,ctx):
+        """接收订阅的通道消息"""
         message = Message.unmarshall(data)
         if not message:
             return
@@ -97,6 +164,8 @@ class TradeAdapter(TradeService, TradeFrontServiceTraits):
         self.product = options.product
         self.account = options.account
 
+        instance.setName('{}_{}_{}'.format(str(ServiceType.TradeAdapter),options.product,options.account))
+
     def  getTradeAccountDetail(self):
         """查询账号配置细节，包括：登录用户名、密码、服务器信息等"""
 
@@ -120,12 +189,24 @@ class TradeAdapter(TradeService, TradeFrontServiceTraits):
         if self.down_counter <= 0:
             print 'Info: Service Adapter is UnNeeded, Stop it..'
             instance.stop()
+        timer.start()
 
     def setupFanoutAndLogHandler(self):
         from mantis.trade.log import TradeServiceLogHandler
         self.initFanoutSwitchers(self.cfgs.get('fanout'))
         handler = TradeServiceLogHandler(self)
         self.logger.addHandler(handler)
+
+
+    def getStrategyLogger(self,strategy_id):
+        """
+        一个交易服务同时提供对多个策略Runner的交易支持，所以根据策略ID返回日志对象
+        """
+        logger = self.strategy_loggers.get(strategy_id)
+        if not logger:
+            logger = StrategyLogHandler(strategy_id, self, default_logger=self.logger)
+            self.strategy_loggers[strategy_id] = logger
+        return logger
 
     def start(self, block=True):
         # return
@@ -151,12 +232,19 @@ class TradeAdapter(TradeService, TradeFrontServiceTraits):
 
         self.gatewayName = ''
         if self.product == ProductClass.Future:
-            self.mainEngine.addGateway(ctpGateway)
+            gateway = self.mainEngine.addGateway(ctpGateway)
             self.gatewayName = ctpGateway.gatewayName
+            gateway.request_id_generator = self.request_id_generator  # 2018.9.10  scott
 
         if self.product == ProductClass.Stock:
             self.mainEngine.addGateway(xtpGateway)
             self.gatewayName = xtpGateway.gatewayName
+
+        if self.product == ProductClass.Coin:
+            from vnpy.trader.gateway import binanceGateway
+            if cfgs.get('exchange') == CryptoCoinType.Binance:
+                self.mainEngine.addGateway(binanceGateway)
+                self.gatewayName = binanceGateway.gatewayName
 
         le.info(u'主引擎创建成功')
         le.info(u'注册日志事件监听')
@@ -194,12 +282,12 @@ class TradeAdapter(TradeService, TradeFrontServiceTraits):
 
     def serviceStatusAndConfigs(self):
         """配置本地服务的运行参数和状态"""
-        cfgs = TradeService.serviceStatusAndConfigs()
+        cfgs = TradeService.serviceStatusAndConfigs(self)
         service = instance.serviceManager.get('http')
         if service:
             http = service.cfgs.get('http', {})
             url = 'http://{host}:{port}/{path}'.format(
-                    host=http.get('host'),
+                    host=http.get('extern_host'),
                     port=http.get('port'),
                     path=http.get('path')
             )
