@@ -54,108 +54,27 @@ class KlineCli(object):
     def make_min(self,symbol,date= str(datetime.now().date()) ):
         from datetime import timedelta
 
-        mins =  kline.get_day_trade_minute_line(symbol,parse(date))
-        spaces = kline.get_trade_timetable_template(symbol)
-        nmin = 1
-        for min in mins:
-            left = 0
-            right = 0
-            space = kline.time_work_right_short(spaces, min)
+        mins =  kline.get_day_trade_calc_minutes_new(symbol,1,parse(date))
 
-            if len(space) == 3 and space[-1].count('*'):  # 开盘集合竞价
-                if min.time() == space[0]:
-                    print '*head time...'
-                    left = 1
-            if len(space) == 3 and space[-1].count('-'):  # 跨日时间
-                right = 0
+        times = mins.values()
+        for trade_time,calc_time,span in times:
+            start = calc_time - TimeDelta(minutes=span)
+            end = calc_time
 
-            endtime = datetime.combine(min.date(), space[1])
-            if min + timedelta(minutes=nmin) >= endtime:
-                print 'trade segment tail time..'
-                right = 1
-
-            print 'Make Kline:',symbol, '1m',str(min)
-            kline.make_min_bar(symbol, min, drop=True,leftMargin=left,rightMargin=right)
-        # print mins
-
-    def _make_nmin(self,symbol,scale,date= str(datetime.now().date()) ):
-        from datetime import timedelta
-        nmin = TimeScale.SCALES[scale]/TimeScale.MINUTE
-        mins = kline.get_day_trade_nminute_line(symbol, nmin, parse(date))
-
-        spaces = kline.get_trade_timetable_template(symbol)
-
-        for min in mins:
-            if nmin == 60:
-                print nmin
-            print 'Make Kline:', symbol,scale,str(min),nmin
-            space = kline.time_work_right_short(spaces, min)
-
-            left = 0
-            right = 0
-
-            if len(space) == 3 and space[-1].count('*'):  # 开盘集合竞价
-
-                if min.time() == space[0]:
-                    print 'head time...'
-                    left = 1
-            if len(space) == 3 and space[-1].count('-'):  # 跨日时间
-                right = 0
+            kline.make_min_bar_real_calc(symbol, '1m', trade_time,start,end)
 
 
-            print min.date(),space
-            endtime = datetime.combine(min.date(),space[1])
-            # print '>>',endtime
-            if min == (endtime - timedelta(minutes=nmin)):
-                print 'tail time..'
-                right = 1
-
-            #kline.make_min_bar(symbol, min, scale, drop=True,leftMargin=left,rightMargin=right)
 
     def make_nmin(self,symbol,scale,date= str(datetime.now().date()) ):
-        from datetime import timedelta
         nmin = TimeScale.SCALES[scale]/TimeScale.MINUTE
-        mins = kline.get_day_trade_nminute_line(symbol, nmin, parse(date))
+        mins = kline.get_day_trade_calc_minutes_new(symbol, nmin, parse(date))
 
-        spaces = kline.get_trade_timetable_template(symbol)
-        for _ in mins:
-            print   _
+        times = mins.values()
+        for trade_time, calc_time, span in times:
+            start = calc_time - TimeDelta(minutes=span)
+            end = calc_time
 
-
-        for min in mins:
-            if nmin == 60:
-                print nmin
-            print 'Make Kline:', symbol,scale,str(min),nmin
-            if nmin == 60:
-                space = kline.time_work_right_short_hour(spaces,min)
-            else:
-                space = kline.time_work_right_short(spaces, min)
-
-
-            left = 0
-            right = 0
-
-            if len(space) == 3 and space[-1].count('*'):  # 开盘集合竞价
-
-                if min.time() == space[0]:
-                    print '*head time...'
-                    left = 1
-            if len(space) == 3 and space[-1].count('-'):  # 跨日时间
-                right = 0
-
-
-            # print min.date(),space
-            endtime = datetime.combine(min.date(),space[1])
-            # print '>>',endtime
-            # if min == (endtime - timedelta(minutes=nmin)):
-            #     print 'tail time..'
-            #     right = 1
-
-            if min + timedelta(minutes=nmin) >= endtime:
-                print 'trade segment tail time..'
-                right = 1
-
-            kline.make_min_bar(symbol, min, scale, drop=True,leftMargin=left,rightMargin=right)
+            kline.make_min_bar_real_calc(symbol, scale, trade_time, start, end)
 
     # ----------------------------------------------------------------------
     def whenDayClose(self):
@@ -213,7 +132,7 @@ class KlineCli(object):
                 date = date.replace(hour=0, minute=0, second=0, microsecond=0)
                 today = date  # datetime.now()
                 nextday = today + TimeDelta(days=1)
-                self.ctp_data_clear(str(today.date()), str(nextday.date()))
+                # self.ctp_data_clear(str(today.date()), str(nextday.date()))
                 for symbol in symbols:
                     self.log_print('make_kline: {} '.format(symbol))
                     self.make_kline_min_symbol(symbol, str(date.date()))
@@ -223,7 +142,7 @@ class KlineCli(object):
 
     def make_kline_min_symbol(self,symbol,date = str(datetime.now().date())):
         """计算指定日期某一合约的所有k线记录"""
-        scales = ['3m', '5m', '15m', '30m', '60m']
+        scales = [ '5m', '15m', '30m', '60m']
         self.make_min(symbol, date)
 
         for scale in scales:
@@ -259,9 +178,7 @@ class KlineCli(object):
         kline.data_clear_days(symbol, start,end,readonly=True)
 
     def make_kline_day(self,start = str(datetime.now().date()),days=1):
-        """生成日线
-            :param start - 开始日期
-            :param days - 计算天数（期间非交易日跳过 ）
+        """生成所有產品的日线數據
 
             值守服务应当在当日下午收盘之后即刻生成单日日线数据(15:15 - )
             某日线包含前一个交易日的夜盘 20:59 - 2:30 ，和当日日盘数据 9:00 - 15:15
@@ -277,12 +194,48 @@ class KlineCli(object):
                     self.make_kline_day_symbol(symbol,date)
             date =date+TimeDelta(days=1)
 
+    # def make_kline_day(self,symbol,start = str(datetime.now().date()),days=1):
+    #     """生成日线
+    #
+    #         值守服务应当在当日下午收盘之后即刻生成单日日线数据(15:15 - )
+    #         某日线包含前一个交易日的夜盘 20:59 - 2:30 ，和当日日盘数据 9:00 - 15:15
+    #     """
+    #     symbols = self.get_subscribed_symbols()
+    #     date = start
+    #     if isinstance(date, str):
+    #         date = parse(date)
+    #     for _ in range(days):
+    #         if kline.is_trade_day(date):
+    #             date = date.replace(hour=0, minute=0, second=0, microsecond=0)
+    #             for symbol in symbols:
+    #                 self.make_kline_day_symbol(symbol,date)
+    #         date =date+TimeDelta(days=1)
+
+
+    def make_kline_many_days_symbol(self,symbol,start = str(datetime.now().date()),days=1):
+        """生成日线
+
+            值守服务应当在当日下午收盘之后即刻生成单日日线数据(15:15 - )
+            某日线包含前一个交易日的夜盘 20:59 - 2:30 ，和当日日盘数据 9:00 - 15:15
+        """
+
+        date = start
+        if isinstance(date, str):
+            date = parse(date)
+        for _ in range(days):
+            if kline.is_trade_day(date):
+                date = date.replace(hour=0, minute=0, second=0, microsecond=0)
+
+                self.make_kline_day_symbol(symbol,date)
+            date =date+TimeDelta(days=1)
+
     def make_kline_day_symbol(self,symbol,date):
-        """ 前日 夜盘  21：0 - 今日收盘 15：30 之间数据"""
+        """ 计算日k线
+         前日 夜盘  21：0 - 今日收盘 15：30 之间数据"""
         if isinstance(date,str):
             date = parse(date)
         self.log_print('make_kline_day: {} {}'.format(symbol, str(date.date())))
-        self.ctp_data_clear_symbol(symbol,date)
+        # self.ctp_data_clear_symbol(symbol,date)
         kline.make_day_bar(symbol, date)
 
 
@@ -296,14 +249,22 @@ python tibet-kline-make.py make_kline_min 2018-8-13  --host 192.168.99.22 --port
 python tibet-kline-make.py make_kline_min_symbol AP810 2018-8-13  --host 192.168.99.22 --port 27018
 
 python tibet-kline-make.py make_kline_day 2018-8-13  --host 192.168.99.22 --port 27018
-python tibet-kline-make.py make_kline_day_symbol AP810 2018-8-13  --host 192.168.99.22 --port 27018
 
 python tibet-kline-make.py whenDayClose  --host 192.168.99.22 --port 27018
 python tibet-kline-make.py whenNightClose  --host 192.168.99.22 --port 27018
 
+
 python tibet-kline-make.py make_nmin m1901 5m 2018-10-29  --host mongodb
 
-python tibet-kline-make.py make_kline_min_symbol  rb1901 2018-10-30  --host mongodb
+
+
+python tibet-kline-make.py make_min m1901  2018-10-29  --host mongodb
+python tibet-kline-make-new.py make_kline_min   2018-11-2 15 --host mongodb
+python tibet-kline-make-new.py make_kline_min_symbol  m1901 2018-11-11  --host mongodb
+python tibet-kline-make-new.py make_kline_day_symbol m1901 2018-11-11  --host mongodb --port 27017
+python tibet-kline-make-new.py make_kline_many_days_symbol m1901 2018-11-2 10  --host mongodb --port 27017
+python tibet-kline-make-new.py make_kline_day   --host mongodb --port 27017
+
 """
 if __name__ == '__main__':
     fire.Fire(KlineCli)

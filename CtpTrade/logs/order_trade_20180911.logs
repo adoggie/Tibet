@@ -1,0 +1,68 @@
+== ctpGateway::onRtnOrder()
+{'orderID': '           1', 'status': u'unknown', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '14:35:46', 'frontID': 3, 'sessionID': 1640592267, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           1', 'price': 4000.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+== ctpGateway::onRtnOrder()
+{'orderID': '           1', 'status': u'pending', 'direction': u'long', 172.16.109.1 - - [11/Sep/2018 14:35:36] "POST //v1/message/ HTTP/1.1" 200 63
+'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '14:35:47', 'frontID': 3, 'sessionID': 1640592267, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           1', 'price': 4000.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+== ctpGateway::onRtnOrder()
+{'orderID': '           1', 'status': u'pending', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '14:35:47', 'frontID': 3, 'sessionID': 1640592267, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           1', 'price': 4000.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+== ctpGateway::onRtnOrder()
+{'orderID': '           1', 'status': u'filled', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 1, 'orderTime': '14:35:47', 'frontID': 3, 'sessionID': 1640592267, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           1', 'price': 4000.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+== ctpGateway::onRtnTrade()
+{'orderID': '           1', 'direction': u'long', 'strategy_id': '', 'gatewayName': 'CTP', 'tradeID': '       93112', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'volume': 1, 'tradeTime': '14:38:55', 'rawData': None, 'vtTradeID': 'CTP.       93112', 'offset': u'open', 'vtOrderID': 'CTP.           1', 'price': 4000.0, 'vtSymbol': 'hc1901'}
+
+
+
+>>> trade immediatelly
+
+
+== ctpGateway::onRtnOrder()
+{'orderID': '           1', 'status': u'unknown', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '14:48:00', 'datetime': '2018-09-11 14:47:50', 'frontID': 3, 'sessionID': 1692636551, 'rawData': None, 'offset': u'open', 'strategy_id': None, 'vtOrderID': 'CTP.1', 'price': 4000.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+== ctpGateway::onRtnOrder()
+{'orderID': '           1', 'status': u'unknown', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '14:48:01', 'frontID': 3, 'sessionID': 1692636551, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           1', 'price': 4000.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+== ctpGateway::onRtnOrder()
+{'orderID': '           1', 'status': u'filled', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 1, 'orderTime': '14:48:01', 'frontID': 3, 'sessionID': 1692636551, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           1', 'price': 4000.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+== ctpGateway::onRtnTrade()
+{'orderID': '           1', 'direction': u'long', 'strategy_id': '', 'gatewayName': 'CTP', 'tradeID': '       95454', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'volume': 1, 'tradeTime': '14:48:01', 'rawData': None, 'vtTradeID': 'CTP.       95454', 'offset': u'open', 'vtOrderID': 'CTP.           1', 'price': 3983.0, 'vtSymbol': 'hc1901'}
+
+////3.1 buy
+== ctpGateway::onRtnOrder()
+{'orderID': '           2', 'status': u'unknown', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '14:50:15', 'frontID': 3, 'sessionID': 1692636551, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           2', 'price': 3910.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+== ctpGateway::onRtnOrder()
+{'orderID': '           2', 'status': u'pending', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '14:50:15', 'frontID': 3, 'sessionID': 1692636551, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           2', 'price': 3910.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+
+
+////3.2 cancel with simnow tool
+
+== ctpGateway::onRtnOrder()
+{'orderID': '           2', 'status': u'pending', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '14:50:15', 'frontID': 3, 'sessionID': 1692636551, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           2', 'price': 3910.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+== ctpGateway::onRtnOrder()
+{'orderID': '           2', 'status': u'cancelled', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '14:50:15', 'frontID': 3, 'sessionID': 1692636551, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           2', 'price': 3910.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+
+//// m1901     buy-close
+== ctpGateway::onRtnOrder()
+{'orderID': '24', 'status': u'unknown', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'DCE', 'symbol': 'm1901', 'request_id': 57, 'tradedVolume': 0, 'orderTime': '14:52:54', 'frontID': 5, 'sessionID': 1366965173, 'rawData': None, 'offset': u'close', 'strategy_id': '', 'vtOrderID': 'CTP.24', 'price': 3182.0, 'vtSymbol': 'm1901', 'totalVolume': 4}
+== ctpGateway::onRtnOrder()
+{'orderID': '24', 'status': u'unknown', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'DCE', 'symbol': 'm1901', 'request_id': 57, 'tradedVolume': 0, 'orderTime': '14:52:54', 'frontID': 5, 'sessionID': 1366965173, 'rawData': None, 'offset': u'close', 'strategy_id': '', 'vtOrderID': 'CTP.24', 'price': 3182.0, 'vtSymbol': 'm1901', 'totalVolume': 4}
+== ctpGateway::onRtnOrder()
+{'orderID': '24', 'status': u'filled', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'DCE', 'symbol': 'm1901', 'request_id': 57, 'tradedVolume': 4, 'orderTime': '14:52:54', 'frontID': 5, 'sessionID': 1366965173, 'rawData': None, 'offset': u'close', 'strategy_id': '', 'vtOrderID': 'CTP.24', 'price': 3182.0, 'vtSymbol': 'm1901', 'totalVolume': 4}
+== ctpGateway::onRtnTrade()
+{'orderID': '24', 'direction': u'long', 'strategy_id': '', 'gatewayName': 'CTP', 'tradeID': '       96599', 'exchange': 'DCE', 'symbol': 'm1901', 'request_id': 0, 'volume': 4, 'tradeTime': '14:52:54', 'rawData': None, 'vtTradeID': 'CTP.       96599', 'offset': u'close', 'vtOrderID': 'CTP.24', 'price': 3182.0, 'vtSymbol': 'm1901'}
+
+//// fu1905 sell close
+== ctpGateway::onRtnTrade()
+{'orderID': '24', 'direction': u'long', 'strategy_id': '', 'gatewayName': 'CTP', 'tradeID': '       96599', 'exchange': 'DCE', 'symbol': 'm1901', 'request_id': 0, 'volume': 4, 'tradeTime': '14:52:54', 'rawData': None, 'vtTradeID': 'CTP.       96599', 'offset': u'close', 'vtOrderID': 'CTP.24', 'price': 3182.0, 'vtSymbol': 'm1901'}
+== ctpGateway::onRtnOrder()
+{'orderID': '25', 'status': u'unknown', 'direction': u'short', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'fu1905', 'request_id': 58, 'tradedVolume': 0, 'orderTime': '14:54:02', 'frontID': 5, 'sessionID': 1366965173, 'rawData': None, 'offset': u'close today', 'strategy_id': '', 'vtOrderID': 'CTP.25', 'price': 3078.0, 'vtSymbol': 'fu1905', 'totalVolume': 4}
+== ctpGateway::onRtnOrder()
+{'orderID': '25', 'status': u'unknown', 'direction': u'short', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'fu1905', 'request_id': 58, 'tradedVolume': 0, 'orderTime': '14:54:02', 'frontID': 5, 'sessionID': 1366965173, 'rawData': None, 'offset': u'close today', 'strategy_id': '', 'vtOrderID': 'CTP.25', 'price': 3078.0, 'vtSymbol': 'fu1905', 'totalVolume': 4}
+== ctpGateway::onRtnOrder()
+{'orderID': '25', 'status': u'filled', 'direction': u'short', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'fu1905', 'request_id': 58, 'tradedVolume': 4, 'orderTime': '14:54:02', 'frontID': 5, 'sessionID': 1366965173, 'rawData': None, 'offset': u'close today', 'strategy_id': '', 'vtOrderID': 'CTP.25', 'price': 3078.0, 'vtSymbol': 'fu1905', 'totalVolume': 4}
+== ctpGateway::onRtnTrade()
+{'orderID': '25', 'direction': u'short', 'strategy_id': '', 'gatewayName': 'CTP', 'tradeID': '       97062', 'exchange': 'SHFE', 'symbol': 'fu1905', 'request_id': 0, 'volume': 4, 'tradeTime': '14:54:02', 'rawData': None, 'vtTradeID': 'CTP.       97062', 'offset': u'close today', 'vtOrderID': 'CTP.25', 'price': 3078.0, 'vtSymbol': 'fu1905'}
+
+//// send order not in trading time
+
+== ctpGateway::onRtnOrder()
+{'orderID': '           3', 'status': u'unknown', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '15:20:46', 'frontID': 3, 'sessionID': 1692636551, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           3', 'price': 3910.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}
+== ctpGateway::onRtnOrder()
+{'orderID': '           3', 'status': u'cancelled', 'direction': u'long', 'cancelTime': '', 'gatewayName': 'CTP', 'exchange': 'SHFE', 'symbol': 'hc1901', 'request_id': 0, 'tradedVolume': 0, 'orderTime': '15:20:46', 'frontID': 3, 'sessionID': 1692636551, 'rawData': None, 'offset': u'open', 'strategy_id': '', 'vtOrderID': 'CTP.           3', 'price': 3910.0, 'vtSymbol': 'hc1901', 'totalVolume': 1}

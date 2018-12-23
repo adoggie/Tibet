@@ -14,10 +14,10 @@ flask-wtf
 #virtualenv
 gevent
 psycopg2
-uwsgi
+#uwsgi
 #flask-cors
-pyDes
-jpype1
+#pyDes
+#jpype1
 requests
 psycogreen
 #gevent-psycopg2
@@ -45,10 +45,13 @@ wmi
 flask-restful
 flask-cors
 gevent-websocket
-ta-lib
+#ta-lib
 grequests
 pp  # https://www.parallelpython.com/content/view/15/30/#QUICKSMP
 redlock-py
 fire
+flask_sqlalchemy
+flask_compress
+gevent-socketio
 
 #qpid-python-1.36.0.tar.gz

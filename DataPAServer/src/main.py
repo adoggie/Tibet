@@ -11,7 +11,7 @@ else:
 
 import json
 from threading import Thread
-from datetime import datetime, time
+from datetime import datetime as DateTime, time as Time , timedelta as TimeDelta
 
 
 from vnpy.trader.vtObject import VtSubscribeReq, VtLogData, VtBarData, VtTickData
@@ -41,6 +41,7 @@ class PAService(TradeService):
         self.contracts = {ProductClass.Future:{},ProductClass.Stock:{}}
         self.generate_bars = []
         self.kline_symbols =[]  # 实时计算k线的合约名称
+        self.all_calc_mins = {}
 
     def init(self, cfgs,**kwargs):
         self.service_id = cfgs.get('id')
@@ -71,6 +72,8 @@ class PAService(TradeService):
         super(PAService,self).start()
         self.active = True
         # self.thread.start()
+
+        self.prepare_kline_calc_minutes()
 
         self.registerTimedTask(self.make_kline,timeout=1)
 
@@ -131,7 +134,7 @@ class PAService(TradeService):
                 # traceback.print_exc()
                 pass
 
-    def make_kline(self,timer):
+    def _make_kline(self,timer):
         """ 定时执行所有合约的k线生成
             生成k线bar发布到redis待写入mongodb
             实时生成指定合约的k线数据，合约定义:  ' kline_symbols'
@@ -149,5 +152,40 @@ class PAService(TradeService):
                 bar = kline.make_latest_nmin_bar(symbol,scale)
                 if bar:
                     self.onXminBar(scale,bar)
+
+        timer.start()
+
+    def prepare_kline_calc_minutes(self):
+        """当天载入当日计算时间分钟点和跨日分钟点
+            凌晨2：40停止程序运行
+        """
+        now = DateTime.now()
+        if now.time() < Time(3,0):  # 如果在凌晨启动的话，去前一天的计算分钟点
+            now = now - TimeDelta(days=1)
+
+        for symbol in self.kline_symbols:
+            self.all_calc_mins[symbol] ={}
+            for k in (1,5,15,30,60):
+                mins = kline.get_day_trade_calc_minutes_new(symbol,k,now)
+                self.all_calc_mins[symbol][k] = mins
+
+
+    def make_kline(self,timer):
+        """ 定时执行所有合约的k线生成
+            生成k线bar发布到redis待写入mongodb
+            实时生成指定合约的k线数据，合约定义:  ' kline_symbols'
+        """
+        # symbols = self.contracts[ProductClass.Future].keys()
+        for symbol in self.kline_symbols:
+
+            # for scale in self.generate_bars:
+            for k in (1,5,15,30,60):
+                scale = '{}m'.format(k)
+                calc_mins = self.all_calc_mins.get(symbol).get(k)
+
+                # 定时生成 合约的1分钟 k线
+                bar = kline.make_lastest_min_bar(symbol, scale,calc_mins)
+                if bar:
+                    self.onXminBar(scale, bar)  # 通知接收用户
 
         timer.start()

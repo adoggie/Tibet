@@ -255,7 +255,8 @@ class FlaskService( ServiceBase):
                         else:
                             app.route(url)(func)
                         self.registerBlueprint(app,path)
-                        path = path + '/' + url
+                        # path = path + '/' + url
+                        path = path + url  # todo. 2018.11.04 
                         path = path.replace('//','/')
                         self.logger.debug('registered blueprint route:'+path)
 

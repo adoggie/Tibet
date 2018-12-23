@@ -29,7 +29,8 @@ class CallReturn(object):
         errmsg = self.errmsg
         if isinstance(self.errcode,ValueEntry):
             data['errcode'] = self.errcode.value
-            errmsg+= self.errcode.comment
+            if not errmsg:
+                errmsg = self.errcode.comment
 
         data['errmsg'] = errmsg
 

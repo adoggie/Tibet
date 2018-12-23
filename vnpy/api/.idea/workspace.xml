@@ -9,7 +9,7 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="3be2c02f-1962-420b-bef1-3a15ec7fc57c" name="Default" comment="" />
+    <list default="true" readonly="true" id="3be2c02f-1962-420b-bef1-3a15ec7fc57c" name="Default" comment="" />
     <option name="EXCLUDED_CONVERTED_TO_IGNORED" value="true" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
@@ -20,12 +20,12 @@
   <component name="FileEditorManager">
     <splitter split-orientation="horizontal" split-proportion="0.44691908">
       <split-first>
-        <leaf>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file leaf-file-name="xtp_api_data_type.h" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/xtp/xtpapi/xtp_api_data_type.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="233">
-                  <caret line="200" column="22" lean-forward="true" selection-start-line="200" selection-start-column="22" selection-end-line="200" selection-end-column="22" />
+                <state relative-caret-position="3000">
+                  <caret line="200" column="22" selection-start-line="200" selection-start-column="22" selection-end-line="200" selection-end-column="22" />
                 </state>
               </provider>
             </entry>
@@ -33,7 +33,7 @@
           <file leaf-file-name="vnxtptrader.cpp" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/xtp/vnxtptrader/vnxtptrader/vnxtptrader.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="241">
+                <state relative-caret-position="16875">
                   <caret line="1125" column="25" selection-start-line="1125" selection-start-column="16" selection-end-line="1125" selection-end-column="25" />
                 </state>
               </provider>
@@ -42,8 +42,8 @@
           <file leaf-file-name="vnxtptrader.h" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/xtp/vnxtptrader/vnxtptrader/vnxtptrader.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="159">
-                  <caret line="75" lean-forward="true" selection-start-line="75" selection-end-line="75" />
+                <state relative-caret-position="1125">
+                  <caret line="75" selection-start-line="75" selection-end-line="75" />
                 </state>
               </provider>
             </entry>
@@ -51,7 +51,7 @@
           <file leaf-file-name="vnxtpquote.cpp" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/xtp/vnxtpquote/vnxtpquote/vnxtpquote.cpp">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="256">
+                <state relative-caret-position="22170">
                   <caret line="1478" column="76" selection-start-line="1478" selection-start-column="54" selection-end-line="1478" selection-end-column="76" />
                   <folding>
                     <element signature="e#980#1024#0" expanded="true" />
@@ -64,7 +64,7 @@
           <file leaf-file-name="ThostFtdcUserApiStruct.h" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcUserApiStruct.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="-682">
+                <state relative-caret-position="23175">
                   <caret line="1545" column="21" selection-start-line="1545" selection-start-column="21" selection-end-line="1545" selection-end-column="21" />
                 </state>
               </provider>
@@ -85,8 +85,8 @@
           <file leaf-file-name="ThostFtdcTraderApi.h" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcTraderApi.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="90">
-                  <caret line="49" column="4" lean-forward="true" selection-start-line="49" selection-start-column="4" selection-end-line="49" selection-end-column="4" />
+                <state relative-caret-position="225">
+                  <caret line="58" column="46" lean-forward="true" selection-start-line="58" selection-start-column="46" selection-end-line="58" selection-end-column="46" />
                   <folding>
                     <element signature="e#366#378#0" expanded="true" />
                     <element signature="e#480#617#0" expanded="true" />
@@ -98,7 +98,7 @@
           <file leaf-file-name="ThostFtdcUserApiDataType.h" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcUserApiDataType.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="250">
+                <state relative-caret-position="2430">
                   <caret line="162" column="13" selection-start-line="162" selection-start-column="13" selection-end-line="162" selection-end-column="13" />
                 </state>
               </provider>
@@ -107,7 +107,7 @@
           <file leaf-file-name="xtp_trader_api.h" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/xtp/xtpapi/xtp_trader_api.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="241">
+                <state relative-caret-position="3960">
                   <caret line="264" column="48" selection-start-line="264" selection-start-column="48" selection-end-line="264" selection-end-column="48" />
                   <folding>
                     <element signature="e#292#304#0" expanded="true" />
@@ -121,8 +121,8 @@
           <file leaf-file-name="xoms_api_struct.h" pinned="false" current-in-tab="false">
             <entry file="file://$PROJECT_DIR$/xtp/xtpapi/xoms_api_struct.h">
               <provider selected="true" editor-type-id="text-editor">
-                <state relative-caret-position="494">
-                  <caret line="34" column="11" lean-forward="true" selection-start-line="34" selection-start-column="11" selection-end-line="34" selection-end-column="11" />
+                <state relative-caret-position="510">
+                  <caret line="34" column="11" selection-start-line="34" selection-start-column="11" selection-end-line="34" selection-end-column="11" />
                 </state>
               </provider>
             </entry>
@@ -130,7 +130,7 @@
         </leaf>
       </split-first>
       <split-second>
-        <leaf>
+        <leaf SIDE_TABS_SIZE_LIMIT_KEY="300">
           <file leaf-file-name="ThostFtdcTraderApi.h" pinned="false" current-in-tab="true">
             <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcTraderApi.h">
               <provider selected="true" editor-type-id="text-editor">
@@ -190,7 +190,6 @@
       <foldersAlwaysOnTop value="true" />
     </navigator>
     <panes>
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <expand>
@@ -207,6 +206,7 @@
           <select />
         </subPane>
       </pane>
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
@@ -227,6 +227,7 @@
   </component>
   <component name="SvnConfiguration" cleanupOnStartRun="true">
     <configuration>$USER_HOME$/.subversion</configuration>
+    <supportedVersion>125</supportedVersion>
   </component>
   <component name="SvnFileUrlMappingImpl">
     <option name="myMappingRoots">
@@ -254,29 +255,31 @@
       <option name="presentableId" value="Default" />
       <updated>1531718231837</updated>
       <workItem from="1531718234324" duration="10989000" />
+      <workItem from="1541607916399" duration="526000" />
     </task>
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="10989000" />
+    <option name="totallyTimeSpent" value="11515000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="39" y="23" width="1557" height="946" extended-state="0" />
+    <editor active="true" />
     <layout>
-      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.44067797" visible="true" weight="0.123046875" />
+      <window_info active="true" content_ui="combo" id="Project" order="0" sideWeight="0.4394673" visible="true" weight="0.123046875" />
       <window_info anchor="bottom" id="TODO" order="6" />
-      <window_info anchor="bottom" id="Event Log" side_tool="true" />
+      <window_info anchor="bottom" id="Event Log" order="7" side_tool="true" />
       <window_info anchor="bottom" id="Run" order="2" />
-      <window_info anchor="bottom" id="Version Control" />
-      <window_info id="Structure" order="1" sideWeight="0.55932206" side_tool="true" visible="true" weight="0.123046875" />
-      <window_info anchor="bottom" id="Terminal" />
+      <window_info anchor="bottom" id="Version Control" order="7" />
+      <window_info id="Structure" order="1" sideWeight="0.5605327" side_tool="true" visible="true" weight="0.123046875" />
+      <window_info anchor="bottom" id="Terminal" order="7" />
       <window_info anchor="bottom" id="Debug" order="3" weight="0.4" />
-      <window_info id="Favorites" side_tool="true" />
-      <window_info anchor="bottom" id="Find" order="1" />
-      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
-      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info id="Favorites" order="2" side_tool="true" />
       <window_info anchor="right" content_ui="combo" id="Hierarchy" order="2" weight="0.25" />
+      <window_info anchor="bottom" id="Inspection" order="5" weight="0.4" />
+      <window_info anchor="right" id="Commander" internal_type="SLIDING" order="0" type="SLIDING" weight="0.4" />
       <window_info anchor="right" id="Ant Build" order="1" weight="0.25" />
+      <window_info anchor="bottom" id="Find" order="1" />
       <window_info anchor="bottom" id="Cvs" order="4" weight="0.25" />
       <window_info anchor="bottom" id="Message" order="0" />
     </layout>
@@ -288,6 +291,92 @@
     <option name="myLimit" value="2678400000" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/xtp/xtpapi/xtp_api_data_type.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3000">
+          <caret line="200" column="22" lean-forward="true" selection-start-line="200" selection-start-column="22" selection-end-line="200" selection-end-column="22" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/xtp/vnxtptrader/vnxtptrader/vnxtptrader.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="16875">
+          <caret line="1125" column="25" selection-start-line="1125" selection-start-column="16" selection-end-line="1125" selection-end-column="25" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/xtp/vnxtptrader/vnxtptrader/vnxtptrader.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="1125">
+          <caret line="75" lean-forward="true" selection-start-line="75" selection-end-line="75" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/xtp/vnxtpquote/vnxtpquote/vnxtpquote.cpp">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="22170">
+          <caret line="1478" column="76" selection-start-line="1478" selection-start-column="54" selection-end-line="1478" selection-end-column="76" />
+          <folding>
+            <element signature="e#980#1024#0" expanded="true" />
+            <element signature="e#1043#1086#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcUserApiStruct.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="23175">
+          <caret line="1545" column="21" selection-start-line="1545" selection-start-column="21" selection-end-line="1545" selection-end-column="21" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcMdApi.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state>
+          <folding>
+            <element signature="e#354#366#0" expanded="true" />
+            <element signature="e#468#593#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcUserApiDataType.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="2430">
+          <caret line="162" column="13" selection-start-line="162" selection-start-column="13" selection-end-line="162" selection-end-column="13" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/xtp/xtpapi/xtp_trader_api.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="3960">
+          <caret line="264" column="48" selection-start-line="264" selection-start-column="48" selection-end-line="264" selection-end-column="48" />
+          <folding>
+            <element signature="e#292#304#0" expanded="true" />
+            <element signature="e#398#535#0" expanded="true" />
+            <element signature="e#8091#8127#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/xtp/xtpapi/xoms_api_struct.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="510">
+          <caret line="34" column="11" lean-forward="true" selection-start-line="34" selection-start-column="11" selection-end-line="34" selection-end-column="11" />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcTraderApi.h">
+      <provider selected="true" editor-type-id="text-editor">
+        <state relative-caret-position="7065">
+          <caret line="471" column="30" selection-start-line="471" selection-start-column="16" selection-end-line="471" selection-end-column="30" />
+          <folding>
+            <element signature="e#366#378#0" expanded="true" />
+            <element signature="e#480#617#0" expanded="true" />
+          </folding>
+        </state>
+      </provider>
+    </entry>
     <entry file="file://$PROJECT_DIR$/xtp/xtpapi/xoms_api_fund_struct.h">
       <provider selected="true" editor-type-id="text-editor" />
     </entry>
@@ -315,17 +404,12 @@
       <provider selected="true" editor-type-id="text-editor">
         <state relative-caret-position="245">
           <caret line="314" column="39" selection-start-line="314" selection-start-column="24" selection-end-line="314" selection-end-column="39" />
-          <folding>
-            <element signature="e#291#303#0" expanded="true" />
-            <element signature="e#397#522#0" expanded="true" />
-            <element signature="e#5870#5906#0" expanded="true" />
-          </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/xtp/xtpapi/xtp_trader_api.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="241">
+        <state relative-caret-position="3960">
           <caret line="264" column="48" selection-start-line="264" selection-start-column="48" selection-end-line="264" selection-end-column="48" />
           <folding>
             <element signature="e#292#304#0" expanded="true" />
@@ -337,35 +421,35 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/xtp/xtpapi/xoms_api_struct.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="494">
-          <caret line="34" column="11" lean-forward="true" selection-start-line="34" selection-start-column="11" selection-end-line="34" selection-end-column="11" />
+        <state relative-caret-position="510">
+          <caret line="34" column="11" selection-start-line="34" selection-start-column="11" selection-end-line="34" selection-end-column="11" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/xtp/xtpapi/xtp_api_data_type.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="233">
-          <caret line="200" column="22" lean-forward="true" selection-start-line="200" selection-start-column="22" selection-end-line="200" selection-end-column="22" />
+        <state relative-caret-position="3000">
+          <caret line="200" column="22" selection-start-line="200" selection-start-column="22" selection-end-line="200" selection-end-column="22" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/xtp/vnxtptrader/vnxtptrader/vnxtptrader.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="159">
-          <caret line="75" lean-forward="true" selection-start-line="75" selection-end-line="75" />
+        <state relative-caret-position="1125">
+          <caret line="75" selection-start-line="75" selection-end-line="75" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/xtp/vnxtptrader/vnxtptrader/vnxtptrader.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="241">
+        <state relative-caret-position="16875">
           <caret line="1125" column="25" selection-start-line="1125" selection-start-column="16" selection-end-line="1125" selection-end-column="25" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/xtp/vnxtpquote/vnxtpquote/vnxtpquote.cpp">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="256">
+        <state relative-caret-position="22170">
           <caret line="1478" column="76" selection-start-line="1478" selection-start-column="54" selection-end-line="1478" selection-end-column="76" />
           <folding>
             <element signature="e#980#1024#0" expanded="true" />
@@ -386,22 +470,22 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcUserApiDataType.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="250">
+        <state relative-caret-position="2430">
           <caret line="162" column="13" selection-start-line="162" selection-start-column="13" selection-end-line="162" selection-end-column="13" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcUserApiStruct.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="-682">
+        <state relative-caret-position="23175">
           <caret line="1545" column="21" selection-start-line="1545" selection-start-column="21" selection-end-line="1545" selection-end-column="21" />
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/ctp/ctpapi/ThostFtdcTraderApi.h">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="90">
-          <caret line="49" column="4" lean-forward="true" selection-start-line="49" selection-start-column="4" selection-end-line="49" selection-end-column="4" />
+        <state relative-caret-position="225">
+          <caret line="58" column="46" lean-forward="true" selection-start-line="58" selection-start-column="46" selection-end-line="58" selection-end-column="46" />
           <folding>
             <element signature="e#366#378#0" expanded="true" />
             <element signature="e#480#617#0" expanded="true" />

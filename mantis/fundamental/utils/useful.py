@@ -74,6 +74,17 @@ def object_assign(obj,values,add_new=False):
     attrs = [s for  s in dir(obj) if not s.startswith('__')  ]
     kvs={}
     for k,v in values.items():
+        attr = getattr(obj, k,None)
+        if attr:
+            # if k =='id':
+            #     print k
+            is_property = False
+            if hasattr(obj.__class__,k):
+                if isinstance(getattr(obj.__class__, k), property):
+                    is_property = True
+            if  callable(attr) or is_property:
+               continue # 函数,属性不能被自动替换
+        # print 'k:',k
         if not add_new:
             if k in attrs:
                 setattr(obj,k,v)
@@ -128,3 +139,19 @@ class Sequence(object):
     def next(self):
         self.value+=self.step
         return self.value
+
+
+def cleaned_json_data(rs,excludes=['_id']):
+    """清除非json格式化的字段"""
+    for r in rs:
+        keys = []
+        for k,v in r:
+            if not isinstance(v,(str,unicode,float,int,bool)):
+                keys.append(k)
+        for ex in excludes:
+            keys.append(ex)
+
+        for k in keys:
+            if r.has_key(k):
+                del r[k]
+    return rs

@@ -1,6 +1,6 @@
 #coding:utf-8
 
-from mantis.trade.bar import ArrayManager
+# from mantis.trade.bar import ArrayManager
 from mantis.trade.types import TradeAccountQuota
 from vnpy.trader.vtConstant import *
 import  gevent 
@@ -65,7 +65,7 @@ class CtpConstantsOrderPriceType(object):
 
 
 class ToolSet(object):
-    ArrayManager = ArrayManager
+    # ArrayManager = ArrayManager
     CtpConstantsOrderPriceType = CtpConstantsOrderPriceType
     sleep = gevent.sleep
 

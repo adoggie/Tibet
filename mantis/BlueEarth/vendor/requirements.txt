@@ -1,4 +1,0 @@
-
-#https://pypi.org/project/CRC-ITU/
-
-CRC-ITU
