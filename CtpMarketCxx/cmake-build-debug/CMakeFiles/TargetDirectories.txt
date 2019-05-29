@@ -1,3 +1,0 @@
-/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/CMakeFiles/rebuild_cache.dir
-/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/CMakeFiles/CtpMarketCxx.dir
-/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/CMakeFiles/edit_cache.dir
