@@ -1,0 +1,177 @@
+
+app_name: 'alice-backend'
+project_name: 'smartvision'
+project_version: '0.1'
+
+logging:
+  level: DEBUG
+  format: '%(levelname)s %(asctime)s  %(message)s'
+  message_format: '%(project_name)s:%(project_version)s %(app_id)s %(_filename)s:%(_lineno)d [%(tags)s] '
+
+  filters:
+    trans:
+      tag: 'TRANS:'   # tag 过滤
+  handlers:
+    - type: file
+      enable: true
+      filename: 'server.log'
+      encoding: 'UTF-8'
+      max_bytes: 67108864 # 64MB
+      backup_count: 10
+
+    - type: console
+      enable: true
+
+http_trace: #自动日志记录
+  level: DEBUG
+  request:
+    options:
+      header:  false
+      body:  true
+      max_size: 500 # 最大数据包长度
+    urls:
+      - match: '/'
+      - match: 'zoo/cat'
+        body:  true
+
+  response:
+    options:
+      header:  false
+      body:  true
+      max_size: 500 # 最大数据包长度
+    urls:
+      - match: '/'
+      - match: 'zoo/cat'
+        body:  true
+
+
+
+datasources:
+  - name: 'mongodb'
+    class: 'mantis.fundamental.nosql.mongo.Datasource'
+    host: '192.168.1.252'
+    port: 27017
+    dbname:
+    user:
+    password:
+    enable: true
+
+  - name: 'zk_1'
+    type: 'zookeeper'
+    enable: false
+    hosts: 'localhost:2181'
+    root: '/camel'
+
+  - name: 'redis'
+    class: 'mantis.fundamental.redis.datasource.Datasource'
+    host: '127.0.0.1'
+    port: 6379
+    password: ''
+    db: 0
+    enable: false
+
+message_brokers:
+  - name: 'redis'
+    class: 'mantis.fundamental.redis.broker.MessageBroker'
+    host: '127.0.0.1'
+    port: 6379
+    password: ''
+    db: 0
+    enable: false
+    channels:
+      - name: 'ctp_contract_tick_queue'
+#        handler: 'get_message'
+        enable: true
+        type: 'queue' # or queue
+
+services:
+  - name: 'http'
+    class: 'mantis.fundamental.flask.service.FlaskService'
+    enable: true
+    block: false
+    cfgs:
+      SQLALCHEMY_DATABASE_URI : 'sqlite:////tmp/test.db'
+      SQLALCHEMY_BINDS:
+      SQLALCHEMY_TRACK_MODIFICATIONS : true
+      SQLALCHEMY_COMMIT_ON_TEARDOWN : true
+      SECRET_KEY : "abc"
+      TEMPLATES_AUTO_RELOAD: true
+      DEBUG: true
+      SEND_FILE_MAX_AGE_DEFAULT: 0
+    http:
+#      host : '172.16.109.237'
+      host : '192.168.99.21'
+      port : 7788
+      threaded: false
+      debug: true
+      websocket: false
+
+    blueprints:
+      - package: 'http'
+        url: '/'
+        name: 'http'
+        register: true
+        modules:
+          - name: 'views'
+            url: 'console'
+            routes:
+              - url: '/'                    # url name
+                name: 'index'   # function name
+                methods: 'GET'
+
+          - name: 'api'
+            url: '/fisher/api'
+            routes:
+              - url: '/trade_days'           # 获取交易日列表
+                name: 'get_trade_days'       #
+                methods: 'POST,GET'
+
+              - url: '/strategy/list'           # 获取策略列表(当日)
+                name: 'get_strategy_list'       #
+                methods: 'POST,GET'
+
+              - url: '/strategy/code/list'           # 获取策略运行证券代码信息
+                name: 'get_code_list'       #
+                methods: 'GET'
+
+              - url: '/strategy/code/logs'           # 获取证券代码运行交易日志
+                name: 'get_code_trade_logs'       #
+                methods: 'GET'
+
+
+  - name:       'main'
+    id:     'alice-backend'
+    enable:     true
+    class:      'main.MainService'
+
+    fanout:
+      - name: 'switch0'
+        channels:
+#          - 'redis/con/queue'
+          - 'redis/concox_device_message/pubsub'
+      - name: 'logging'
+        channels:
+          - 'redis/trade.log.{service_type}/queue'
+          - 'redis/trade.log.{service_type}.{service_id}/pubsub'
+      - name: 'strategy_logging'
+        channels:
+          - 'redis/trade.strategy.log/queue'
+          - 'redis/trade.strategy.log.pub/pubsub'
+
+    checkProcesses:
+      - name: 'innerbox'
+        class: 'check_innerbox.CheckProcessInnerBox'
+        iptable: 'innerbox.txt'
+        wait: 5
+        port: 18699
+    image_store_path: '/tmp'    # 视频影像存放位置
+
+
+
+# qpid-receive -b localhost:5672 -a "mq_test;{create:always,node:{type:queue,durable:true}}"
+
+
+
+
+
+

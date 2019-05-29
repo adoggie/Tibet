@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeBlocks_project_file>
+	<FileVersion major="1" minor="6"/>
+	<Project>
+		<Option title="CtpMarketCxx"/>
+		<Option makefile_is_custom="1"/>
+		<Option compiler="gcc"/>
+		<Option virtualFolders="CMake Files\;"/>
+		<Build>
+			<Target title="all">
+				<Option working_dir="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 all"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="rebuild_cache">
+				<Option working_dir="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 rebuild_cache"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="CtpMarketCxx">
+				<Option output="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/CtpMarketCxx" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 CtpMarketCxx"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="CtpMarketCxx/fast">
+				<Option output="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/CtpMarketCxx" prefix_auto="0" extension_auto="0"/>
+				<Option working_dir="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug"/>
+				<Option object_output="./"/>
+				<Option type="1"/>
+				<Option compiler="gcc"/>
+				<Compiler>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/x86_64-redhat-linux"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/../../../../include/c++/4.8.5/backward"/>
+					<Add directory="/usr/lib/gcc/x86_64-redhat-linux/4.8.5/include"/>
+					<Add directory="/usr/local/include"/>
+					<Add directory="/usr/include"/>
+				</Compiler>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 CtpMarketCxx/fast"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+			<Target title="edit_cache">
+				<Option working_dir="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug"/>
+				<Option type="4"/>
+				<MakeCommands>
+					<Build command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 edit_cache"/>
+					<CompileFile command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 &quot;$file&quot;"/>
+					<Clean command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+					<DistClean command="/usr/bin/gmake -j4 -f &quot;/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/cmake-build-debug/Makefile&quot;  VERBOSE=1 clean"/>
+				</MakeCommands>
+			</Target>
+		</Build>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/app.cpp">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/app.h">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/config.cpp">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/config.h">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/logger.cpp">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/logger.h">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/main.cpp">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/market.cpp">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/market.h">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/service.cpp">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/service.h">
+			<Option target="CtpMarketCxx"/>
+		</Unit>
+		<Unit filename="/mnt/hgfs/Projects/Branches/Tibet_0.5/CtpMarketCxx/CMakeLists.txt">
+			<Option virtualFolder="CMake Files\"/>
+		</Unit>
+	</Project>
+</CodeBlocks_project_file>

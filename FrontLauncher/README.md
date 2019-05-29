@@ -1,6 +1,0 @@
-
-
-FrontLauncher 
-------
-
-front service launcher 

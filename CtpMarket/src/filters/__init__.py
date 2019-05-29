@@ -1,2 +1,0 @@
-
-from .ctp_tick_validator import CtpTickValidator
