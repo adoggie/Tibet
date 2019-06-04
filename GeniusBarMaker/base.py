@@ -13,6 +13,7 @@ BarCycle_60M = 60
 BarCycle_1D = 60*24
 
 BarCycleList = (BarCycle_1M,BarCycle_5M,BarCycle_15M,BarCycle_30M,BarCycle_60M)
+# BarCycleList = (BarCycle_60M,)
 
 
 class TickData(object):
@@ -76,21 +77,25 @@ class BarData(object):
 
         self.datetime = self.start
         # self.end = self.datetime.replace(minute=min_end, second=0, microsecond=0)
-        # print 'bar init: ',self.symbol , ' cycle:',self.cycle, self.start , self.end
+        print 'bar init: ',self.symbol , ' cycle:',self.cycle, self.start , self.end
 
     def updateTick(self,tick):
         """ """
-        if isinstance(tick, TickTimedBreak):
-            return BarStatus_Broken
+        # if isinstance(tick, TickTimedBreak):
+        #     return BarStatus_Broken
 
         if tick.datetime >= self.end or tick.datetime < self.start:
-            return BarStatus_Closed
+            if isinstance(tick,TickTimedBreak):
+                return BarStatus_Broken
+            else:
+                return BarStatus_Closed
 
-        self.high = max(self.high,tick.LastPrice)
-        self.low = min(self.low , tick.LastPrice)
-        self.close = tick.LastPrice
-        self.openInterest = tick.OpenInterest
-        self.volume +=  tick.Volume - self.last_volume
+        if isinstance(tick,TickData):
+            self.high = max(self.high,tick.LastPrice)
+            self.low = min(self.low , tick.LastPrice)
+            self.close = tick.LastPrice
+            self.openInterest = tick.OpenInterest
+            self.volume +=  tick.Volume - self.last_volume
 
         return BarStatus_WaitMore
 

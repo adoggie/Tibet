@@ -9,7 +9,7 @@ TEST = True
 
 
 host='192.168.1.252'
-host='192.168.129.134'
+# host='192.168.129.134'
 db_host= host
 
 db_conn = None

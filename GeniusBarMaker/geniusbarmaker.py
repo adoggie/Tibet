@@ -64,6 +64,8 @@ def onBar(bar):
     """
     if not bar:
         return
+    if not is_in_trading_time(bar.datetime):
+        return
 
     data = bar.dict()
 
@@ -71,7 +73,13 @@ def onBar(bar):
 
     message = json.dumps(data)
     bar_channel_pub.publish_or_produce( message )
+
+    channelname = 'ctp.bar.pub_'+bar.symbol+'_'+str(bar.cycle)+'m'
+    broker.conn.publish(channelname,message)
+
     print 'on bar () ',bar.symbol,bar.cycle,bar.datetime,'\n'
+
+
 
 @singleton
 class TickFilter(object):
@@ -87,7 +95,20 @@ class TickFilter(object):
         symbol = tick.InstrumentID
         product = get_symbol_prefix(symbol)
 
-        return True
+
+        return is_in_trading_time(tick.datetime)
+
+def is_in_trading_time(time):
+    time = time.time()
+    if time >= datetime.time(15, 30) and time < datetime.time(20, 55):
+        return False
+    if time >= datetime.time(10, 15) and time < datetime.time(10, 30):
+        return False
+    if time >= datetime.time(11, 30) and time < datetime.time(13, 0):
+        return False
+    if time >= datetime.time(2, 30) and time < datetime.time(8, 55):
+        return False
+    return True
 
 @singleton
 class TimedDriver(object):
@@ -116,6 +137,7 @@ class TimedDriver(object):
             time.sleep(1)
 
             if config.REAL: # 盘中运行时需打开 REAL ，将定时产生分钟break信号，触发前一个k线周期结束
+                # pass
                 self.time_drive()
 
     def time_drive(self):
@@ -146,6 +168,8 @@ def init_tick_subs():
     bar_channel_pub.open()
 
 
+
+
 def init_data():
     host, port, db, passwd = config.broker_url.split(':')
     broker.init(dict(host=host, port=port, db=db, password=passwd))
@@ -156,7 +180,8 @@ def main():
     init_data()
     init_tick_subs()
     print 'Bar Maker Ready..'
-    TimedDriver().start().wait()
+    if config.REAL:
+        TimedDriver().start().wait()
 
 
 if __name__ == '__main__':

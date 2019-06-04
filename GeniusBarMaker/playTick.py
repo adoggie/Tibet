@@ -21,9 +21,13 @@ import requests
 from mantis.fundamental.redis.broker import MessageBroker
 from mantis.fundamental.utils.useful import object_assign ,hash_object,singleton
 import config
+import geniusbarmaker as MakeBarMain
 
+config.TEST = True
+config.REAL = False
 
 symbol = 'm1909'
+symbol = 'AP910'
 dbname = 'Ctp_Tick'
 
 
@@ -32,8 +36,6 @@ bar_channel_pub = None
 
 db = config.db_conn[dbname]
 coll = db[symbol]
-
-
 
 
 def init_channel_pub():
@@ -57,10 +59,11 @@ def main():
         del r['_id']
         message = json.dumps(r)
         bar_channel_pub.publish_or_produce(message)
-        time.sleep(.001)
-        print 'pub tick..',symbol,r['DateTime']
+        # time.sleep(.001)
+        # print 'pub tick..',symbol,r['DateTime']
     print 'play end..'
 
 if __name__ == '__main__':
-    if config.TEST:
-        main()
+    MakeBarMain.main()
+    time.sleep(2)
+    main()

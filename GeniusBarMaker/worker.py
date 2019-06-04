@@ -33,7 +33,8 @@ class BarWorker(object):
                 self.bar = BarData(self.cycle)
                 self.bar.init(tick)  # 记住bar周期内出现的第一个tick时间
 
-
+            # if self.cycle == BarCycle_60M:
+            #     print '60'
             ret = self.bar.updateTick(tick)
             if ret == BarStatus_WaitMore:
                 break
